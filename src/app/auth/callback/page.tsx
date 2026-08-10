@@ -26,7 +26,8 @@ export default function AuthCallbackPage() {
 
         if (data.success) {
           window.dispatchEvent(new Event('cartUpdated'));
-          window.location.href = '/';
+          // Force hard redirect to homepage to ensure all cookies and session state are refreshed
+          window.location.replace('/');
         } else if (mounted) {
           setError(data.error || 'Không thể đồng bộ tài khoản Google');
         }
@@ -37,27 +38,38 @@ export default function AuthCallbackPage() {
 
     const handleAuthCallback = async () => {
       try {
-        // 1. Try fetching current session directly
-        const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
+        // 1. Check if PKCE 'code' query parameter is present in URL
+        const searchParams = new URLSearchParams(window.location.search);
+        const code = searchParams.get('code');
 
+        if (code) {
+          const { data, error: exchangeErr } = await supabase.auth.exchangeCodeForSession(code);
+          if (!exchangeErr && data?.session?.user) {
+            await syncUserAndRedirect(data.session.user);
+            return;
+          }
+        }
+
+        // 2. Check if active session exists
+        const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           await syncUserAndRedirect(session.user);
           return;
         }
 
-        // 2. Listen for auth state change if session is being processed asynchronously
+        // 3. Subscribe to auth state change (Implicit flow or async session retrieval)
         const { data: authListener } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           if (currentSession?.user) {
             await syncUserAndRedirect(currentSession.user);
           }
         });
 
-        // 3. Fallback timeout if no session is returned
+        // 4. Timeout fallback
         setTimeout(() => {
           if (mounted && !session?.user) {
-            setError('Không nhận được phiên đăng nhập từ Google. Vui lòng thử lại.');
+            setError('Không nhận được thông tin xác thực từ Google. Vui lòng thử lại.');
           }
-        }, 6000);
+        }, 5000);
 
         return () => {
           authListener.subscription.unsubscribe();

@@ -21,7 +21,19 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (!account) {
-      // Create customer account for Google user
+      // Generate a unique username from email
+      const baseUsername = email.split('@')[0] || `google_${Date.now()}`;
+      let username = baseUsername;
+      let counter = 1;
+
+      while (true) {
+        const { data: existUser } = await supabaseAdmin.from('accounts').select('id').eq('username', username).maybeSingle();
+        if (!existUser) break;
+        username = `${baseUsername}_${counter}`;
+        counter++;
+      }
+
+      // Create customer account for Google user in database
       const { data: newAcc, error: createErr } = await supabaseAdmin
         .from('accounts')
         .insert({

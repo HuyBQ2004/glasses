@@ -3,13 +3,39 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { User, LogOut, LayoutDashboard, Search, ShoppingBag, Package } from 'lucide-react';
+import { User, LogOut, LayoutDashboard, Search, ShoppingBag, Package, Sun, Moon } from 'lucide-react';
 
 export default function Header() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [cartCount, setCartCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    const savedTheme = (localStorage.getItem('theme') as 'dark' | 'light') || 'dark';
+    setTheme(savedTheme);
+    if (savedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    localStorage.setItem('theme', nextTheme);
+    if (nextTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+      document.documentElement.classList.add('dark');
+    }
+  };
 
   const fetchUserAndCart = async () => {
     try {
@@ -88,8 +114,19 @@ export default function Header() {
           </button>
         </form>
 
-        {/* 3. AVATAR / USER PROFILE */}
-        <div className="flex items-center shrink-0">
+        {/* 3. THEME TOGGLE & AVATAR / USER PROFILE */}
+        <div className="flex items-center gap-3 shrink-0">
+          
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Chuyển sang Giao diện Sáng' : 'Chuyển sang Giao diện Tối'}
+            className="p-2.5 rounded-full bg-neutral-800 hover:bg-neutral-750 text-amber-400 hover:text-amber-300 transition-all border border-neutral-700/80 shadow-md"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+          </button>
+
+          {/* Avatar Profile / Login Icon */}
           {user ? (
             <div className="relative group">
               <button className="flex items-center gap-2 p-1 rounded-full bg-neutral-800 border border-neutral-700 hover:border-amber-500/60 transition-all shadow-md">
