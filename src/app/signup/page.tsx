@@ -66,7 +66,13 @@ export default function SignupPage() {
           redirectTo: `${window.location.origin}/api/auth/google/callback`,
         },
       });
-      if (error) setError(error.message);
+      if (error) {
+        if (error.message.includes('provider is not enabled') || error.message.includes('validation_failed')) {
+          setError('Tính năng Google Provider chưa được bật trên Supabase Dashboard. Bạn cần vào Supabase -> Authentication -> Providers -> Google và gạt bật Enabled.');
+        } else {
+          setError(error.message);
+        }
+      }
     } catch (err: any) {
       setError('Đã xảy ra lỗi khi đăng ký bằng Google');
     }
