@@ -9,7 +9,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Thiếu thông tin đơn hàng' }, { status: 400 });
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    // Dynamically get the base URL from request origin or env
+    let appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl || appUrl.includes('localhost')) {
+      const origin = new URL(req.url).origin;
+      if (origin && !origin.includes('localhost')) {
+        appUrl = origin;
+      } else {
+        const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
+        const proto = req.headers.get('x-forwarded-proto') || 'https';
+        if (host && !host.includes('localhost')) {
+          appUrl = `${proto}://${host}`;
+        }
+      }
+    }
+    appUrl = (appUrl || 'http://localhost:3000').replace(/\/$/, '');
     
     // Generate a positive 32-bit integer orderCode for PayOS
     const orderCode = Math.floor(Math.random() * 899999) + 100000;

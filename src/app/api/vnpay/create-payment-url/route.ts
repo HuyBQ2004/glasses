@@ -8,7 +8,16 @@ export async function POST(req: Request) {
     const tmnCode = process.env.VNP_TMNCODE || 'DEMO1234';
     const secretKey = process.env.VNP_HASHSECRET || 'SECRETKEY1234567890';
     let vnpUrl = process.env.VNP_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
-    const returnUrl = process.env.VNP_RETURNURL || 'http://localhost:3000/api/vnpay/return';
+    let appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl || appUrl.includes('localhost')) {
+      const origin = new URL(req.url).origin;
+      if (origin && !origin.includes('localhost')) {
+        appUrl = origin;
+      }
+    }
+    appUrl = (appUrl || 'http://localhost:3000').replace(/\/$/, '');
+
+    const returnUrl = process.env.VNP_RETURNURL || `${appUrl}/api/vnpay/return`;
 
     const date = new Date();
     const createDate = date.getFullYear().toString() +
