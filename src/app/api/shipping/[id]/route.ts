@@ -5,8 +5,8 @@ import { getCurrentUser } from '@/lib/auth';
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
-    if (!user || (user.role !== 'shipper' && user.role !== 'owner')) {
-      return NextResponse.json({ success: false, error: 'Chỉ có Shipper hoặc Owner cửa hàng mới được quản lý vận chuyển' }, { status: 403 });
+    if (!user || (user.role !== 'admin' && user.role !== 'owner')) {
+      return NextResponse.json({ success: false, error: 'Chỉ có Owner cửa hàng hoặc Admin mới được quản lý vận chuyển' }, { status: 403 });
     }
 
     const { id } = await params;

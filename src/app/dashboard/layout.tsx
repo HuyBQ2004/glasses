@@ -36,37 +36,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         const role = data.user.role;
         setUser(data.user);
 
-        // --- STRICT PAGE PROTECTION LOGIC matching AdminFilter ---
+        // --- STRICT PAGE PROTECTION LOGIC ---
         
-        // 1. Shipper: ONLY allowed /dashboard/shipping
-        if (role === 'shipper') {
-          if (pathname !== '/dashboard/shipping') {
-            router.replace('/dashboard/shipping');
-            return;
-          }
-        }
-
-        // 2. Warehouse Manager: ONLY allowed /dashboard/stock, /dashboard/products, /dashboard/categories
-        if (role === 'warehouse_manager') {
-          const allowed = ['/dashboard/stock', '/dashboard/products', '/dashboard/categories'];
-          if (!allowed.includes(pathname)) {
-            router.replace('/dashboard/stock');
-            return;
-          }
-        }
-
-        // 3. Store Owner: Allowed /dashboard, /dashboard/products, /dashboard/orders, /dashboard/categories, /dashboard/vouchers, /dashboard/shipping, /dashboard/feedbacks
-        //    CANNOT access /dashboard/staff (ONLY admin) or /dashboard/stock (ONLY warehouse_manager)
+        // 1. Store Owner: Allowed all store management pages.
+        //    CANNOT access /dashboard/staff (ONLY system admin)
         if (role === 'owner') {
-          if (pathname === '/dashboard/staff' || pathname === '/dashboard/stock') {
-            router.replace('/dashboard');
-            return;
-          }
-        }
-
-        // 4. Admin: Allowed /dashboard, /dashboard/staff, /dashboard/products, /dashboard/orders, /dashboard/categories, /dashboard/vouchers, /dashboard/feedbacks
-        if (role === 'admin') {
-          if (pathname === '/dashboard/stock' || pathname === '/dashboard/shipping') {
+          if (pathname === '/dashboard/staff') {
             router.replace('/dashboard');
             return;
           }
@@ -93,8 +68,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const isAdmin = user.role === 'admin';
   const isOwner = user.role === 'owner';
-  const isShipper = user.role === 'shipper';
-  const isWarehouse = user.role === 'warehouse_manager';
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white flex font-sans">
@@ -122,10 +95,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <p className="text-xs text-amber-400 font-mono capitalize font-bold mt-0.5">Role: {user.role}</p>
           </div>
 
-          {/* Navigation Links STRICTLY scoped by Role */}
+          {/* Navigation Links */}
           <nav className="space-y-1 text-sm font-medium">
             
-            {/* Overview Statistics & Revenue (Admin & Owner ONLY) */}
+            {/* Overview Statistics & Revenue (Admin & Owner) */}
             {(isAdmin || isOwner) && (
               <Link
                 href="/dashboard"
@@ -137,7 +110,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             )}
 
-            {/* Staff / Account Management (ONLY System Admin) */}
+            {/* Account & System Config (ONLY System Admin) */}
             {isAdmin && (
               <Link
                 href="/dashboard/staff"
@@ -149,8 +122,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             )}
 
-            {/* Product Management (Admin, Owner, Warehouse Manager) */}
-            {(isAdmin || isOwner || isWarehouse) && (
+            {/* Product Management */}
+            {(isAdmin || isOwner) && (
               <Link
                 href="/dashboard/products"
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors ${
@@ -161,7 +134,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             )}
 
-            {/* Order Management (Admin & Owner ONLY) */}
+            {/* Order Management */}
             {(isAdmin || isOwner) && (
               <Link
                 href="/dashboard/orders"
@@ -173,8 +146,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             )}
 
-            {/* Category Management (Admin, Owner, Warehouse Manager) */}
-            {(isAdmin || isOwner || isWarehouse) && (
+            {/* Category Management */}
+            {(isAdmin || isOwner) && (
               <Link
                 href="/dashboard/categories"
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors ${
@@ -185,7 +158,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             )}
 
-            {/* Voucher Management (Admin & Owner ONLY) */}
+            {/* Stock Import Management */}
+            {(isAdmin || isOwner) && (
+              <Link
+                href="/dashboard/stock"
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors ${
+                  pathname === '/dashboard/stock' ? 'bg-amber-500 text-neutral-950 font-bold' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+                }`}
+              >
+                <Warehouse className="w-4 h-4" /> Quản Lý Nhập Kho
+              </Link>
+            )}
+
+            {/* Shipping & Delivery Management */}
+            {(isAdmin || isOwner) && (
+              <Link
+                href="/dashboard/shipping"
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors ${
+                  pathname === '/dashboard/shipping' ? 'bg-amber-500 text-neutral-950 font-bold' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+                }`}
+              >
+                <Truck className="w-4 h-4" /> Quản Lý Giao Hàng
+              </Link>
+            )}
+
+            {/* Voucher Management */}
             {(isAdmin || isOwner) && (
               <Link
                 href="/dashboard/vouchers"
@@ -197,31 +194,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             )}
 
-            {/* Stock Import Management (ONLY Warehouse Manager) */}
-            {isWarehouse && (
-              <Link
-                href="/dashboard/stock"
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors ${
-                  pathname === '/dashboard/stock' ? 'bg-amber-500 text-neutral-950 font-bold' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
-                }`}
-              >
-                <Warehouse className="w-4 h-4" /> Quản Lý Nhập Kho
-              </Link>
-            )}
-
-            {/* Shipping & Delivery Management (ONLY Shipper & Owner) */}
-            {(isShipper || isOwner) && (
-              <Link
-                href="/dashboard/shipping"
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors ${
-                  pathname === '/dashboard/shipping' ? 'bg-amber-500 text-neutral-950 font-bold' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
-                }`}
-              >
-                <Truck className="w-4 h-4" /> Quản Lý Giao Hàng
-              </Link>
-            )}
-
-            {/* Feedback Management (Admin & Owner ONLY) */}
+            {/* Feedback Management */}
             {(isAdmin || isOwner) && (
               <Link
                 href="/dashboard/feedbacks"

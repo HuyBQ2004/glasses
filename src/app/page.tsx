@@ -11,7 +11,6 @@ export default function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [activeBrand, setActiveBrand] = useState<string>('all');
   const [activeShape, setActiveShape] = useState<string>('all');
@@ -36,20 +35,6 @@ export default function HomePage() {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const handleSeedData = async () => {
-    setSeeding(true);
-    try {
-      const res = await fetch('/api/seed');
-      const data = await res.json();
-      alert(data.message || 'Khởi tạo dữ liệu mẫu kính mắt thành công!');
-      fetchData();
-    } catch (error: any) {
-      alert('Lỗi khởi tạo: ' + error.message);
-    } finally {
-      setSeeding(false);
-    }
-  };
 
   const handleAddToCart = async (productId: string) => {
     try {
@@ -113,15 +98,6 @@ export default function HomePage() {
                 >
                   Khám Phá Bộ Sưu Tập <ArrowRight className="w-5 h-5" />
                 </Link>
-
-                <button
-                  onClick={handleSeedData}
-                  disabled={seeding}
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white hover:border-amber-500/50 transition-colors text-sm"
-                >
-                  <RefreshCw className={`w-4 h-4 text-amber-400 ${seeding ? 'animate-spin' : ''}`} />
-                  {seeding ? 'Đang tạo dữ liệu...' : 'Nạp Dữ Liệu Kính Mẫu (Seed)'}
-                </button>
               </div>
 
               {/* Stats Badge */}
@@ -228,13 +204,7 @@ export default function HomePage() {
             <div className="text-center py-20 text-neutral-500 font-medium">Đang tải danh sách kính mắt...</div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-20 bg-neutral-900/40 rounded-3xl border border-neutral-850">
-              <p className="text-neutral-400 font-semibold mb-4">Chưa có mẫu kính phù hợp với bộ lọc đã chọn.</p>
-              <button
-                onClick={handleSeedData}
-                className="px-6 py-2.5 rounded-xl bg-amber-500 text-neutral-950 font-bold text-sm shadow-md"
-              >
-                Nạp dữ liệu kính mẫu (Seed)
-              </button>
+              <p className="text-neutral-400 font-semibold">Chưa có mẫu kính nào. Vui lòng đăng nhập với tài khoản Admin/Owner để thêm sản phẩm!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

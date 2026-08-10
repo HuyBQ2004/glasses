@@ -47,7 +47,7 @@ export default function AdminStaffPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-black text-white tracking-tight">Quản Lý Nhân Viên & Phân Quyền (Roles)</h1>
-        <p className="text-sm text-neutral-400 mt-1">Cấp quyền truy cập cho Admin, Owner, Shipper, Warehouse Manager và Khách hàng</p>
+        <p className="text-sm text-neutral-400 mt-1">Cấp quyền truy cập cho Admin (Quản trị hệ thống), Owner (Chủ cửa hàng) và Khách hàng</p>
       </div>
 
       {loading ? (
@@ -81,8 +81,6 @@ export default function AdminStaffPage() {
                     >
                       <option value="admin">admin (Quản trị hệ thống)</option>
                       <option value="owner">owner (Chủ cửa hàng)</option>
-                      <option value="shipper">shipper (Nhân viên giao hàng)</option>
-                      <option value="warehouse_manager">warehouse_manager (Quản lý kho)</option>
                       <option value="customer">customer (Khách hàng)</option>
                     </select>
                   </td>

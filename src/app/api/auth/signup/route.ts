@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { hashPassword, signToken } from '@/lib/auth';
+import { hashPassword } from '@/lib/auth';
+import { sendActivationEmail } from '@/lib/email';
+import crypto from 'crypto';
 
 export async function POST(req: Request) {
   try {
@@ -10,17 +12,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Tên đăng nhập và mật khẩu là bắt buộc' }, { status: 400 });
     }
 
+    if (!email) {
+      return NextResponse.json({ success: false, error: 'Địa chỉ Email là bắt buộc để kích hoạt tài khoản' }, { status: 400 });
+    }
+
     const { data: existing } = await supabase
       .from('accounts')
       .select('id')
       .eq('username', username)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       return NextResponse.json({ success: false, error: 'Tên đăng nhập đã tồn tại' }, { status: 400 });
     }
 
+    // Determine Base URL for Activation Link
+    let appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl || appUrl.includes('localhost')) {
+      const origin = new URL(req.url).origin;
+      if (origin && !origin.includes('localhost')) appUrl = origin;
+    }
+    appUrl = (appUrl || 'http://localhost:3000').replace(/\/$/, '');
+
+    const activationToken = crypto.randomBytes(24).toString('hex');
     const hashedPassword = hashPassword(password);
+
     const { data: user, error } = await supabase
       .from('accounts')
       .insert({
@@ -31,7 +47,8 @@ export async function POST(req: Request) {
         email,
         phone,
         address,
-        active: true,
+        active: false, // Inactive until email verification
+        token: activationToken, // Store token in DB
       })
       .select()
       .single();
@@ -40,34 +57,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: error?.message || 'Không thể tạo tài khoản' }, { status: 500 });
     }
 
-    const token = signToken({
-      userId: user.id,
-      username: user.username,
-      role: user.role,
+    // Send Activation Email
+    await sendActivationEmail({
+      to: email,
+      username: user.fullname || user.username,
+      token: activationToken,
+      appUrl,
     });
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
-      user: {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-        fullname: user.fullname,
-        email: user.email,
-        phone: user.phone,
-      },
-      token,
+      requireActivation: true,
+      message: 'Đăng ký thành công! Vui lòng kiểm tra hộp thư email của bạn để nhấp vào liên kết kích hoạt tài khoản trước khi đăng nhập.',
     });
-
-    response.cookies.set('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60,
-    });
-
-    return response;
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }

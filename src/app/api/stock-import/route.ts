@@ -5,8 +5,8 @@ import { getCurrentUser } from '@/lib/auth';
 export async function GET() {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'warehouse_manager') {
-      return NextResponse.json({ success: false, error: 'Chỉ có Quản lý kho (Warehouse Manager) mới được xem lịch sử nhập kho' }, { status: 403 });
+    if (!user || (user.role !== 'admin' && user.role !== 'owner')) {
+      return NextResponse.json({ success: false, error: 'Chỉ có Chủ cửa hàng (Owner) hoặc Admin mới được xem lịch sử nhập kho' }, { status: 403 });
     }
 
     const { data: imports, error } = await supabase
@@ -34,8 +34,8 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'warehouse_manager') {
-      return NextResponse.json({ success: false, error: 'Chỉ có Quản lý kho (Warehouse Manager) mới được thực hiện nhập kho' }, { status: 403 });
+    if (!user || (user.role !== 'admin' && user.role !== 'owner')) {
+      return NextResponse.json({ success: false, error: 'Chỉ có Chủ cửa hàng (Owner) hoặc Admin mới được thực hiện nhập kho' }, { status: 403 });
     }
 
     const { productId, importQuantity, note } = await req.json();

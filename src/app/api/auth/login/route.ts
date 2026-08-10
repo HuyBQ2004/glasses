@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     }
 
     if (!user.active) {
-      return NextResponse.json({ success: false, error: 'Tài khoản của bạn đã bị khóa' }, { status: 403 });
+      return NextResponse.json({ success: false, error: 'Tài khoản chưa được kích hoạt qua Email. Vui lòng kiểm tra email để nhấp vào liên kết kích hoạt.' }, { status: 403 });
     }
 
     const token = signToken({
