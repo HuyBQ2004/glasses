@@ -26,10 +26,13 @@ export default function SignupPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const [activationLink, setActivationLink] = useState('');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
+    setActivationLink('');
     setLoading(true);
 
     try {
@@ -43,6 +46,9 @@ export default function SignupPage() {
       if (data.success) {
         if (data.requireActivation) {
           setSuccessMsg(data.message || 'Đăng ký thành công! Vui lòng kiểm tra hộp thư Email để nhấp vào liên kết kích hoạt trước khi đăng nhập.');
+          if (data.activationUrl) {
+            setActivationLink(data.activationUrl);
+          }
         } else {
           window.dispatchEvent(new Event('cartUpdated'));
           router.push('/');
@@ -100,10 +106,22 @@ export default function SignupPage() {
               <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
               <h3 className="text-lg font-bold text-white">Đăng Ký Thành Công! ✉️</h3>
               <p className="text-sm text-neutral-300 leading-relaxed">{successMsg}</p>
-              <div className="pt-2">
+              
+              {activationLink && (
+                <div className="pt-2">
+                  <a
+                    href={activationLink}
+                    className="inline-block px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-black text-sm shadow-lg mb-3"
+                  >
+                    👉 Kích Hoạt Tài Khoản Ngay (Bấm Vào Đây)
+                  </a>
+                </div>
+              )}
+
+              <div className="pt-1 border-t border-neutral-800/80 mt-3">
                 <Link
                   href="/login"
-                  className="inline-block px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-sm shadow-md"
+                  className="inline-block px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-sm shadow-md mt-2"
                 >
                   Đi Đến Trang Đăng Nhập
                 </Link>

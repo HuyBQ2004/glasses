@@ -57,6 +57,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: error?.message || 'Không thể tạo tài khoản' }, { status: 500 });
     }
 
+    const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+
     // Send Activation Email
     await sendActivationEmail({
       to: email,
@@ -65,10 +67,15 @@ export async function POST(req: Request) {
       appUrl,
     });
 
+    const activationUrl = `${appUrl}/verify-email?token=${activationToken}&username=${encodeURIComponent(user.username)}`;
+
     return NextResponse.json({
       success: true,
       requireActivation: true,
-      message: 'Đăng ký thành công! Vui lòng kiểm tra hộp thư email của bạn để nhấp vào liên kết kích hoạt tài khoản trước khi đăng nhập.',
+      message: hasSmtp
+        ? 'Đăng ký thành công! Vui lòng kiểm tra hộp thư Email để nhấp vào liên kết kích hoạt tài khoản.'
+        : 'Đăng ký thành công! Vui lòng kích hoạt tài khoản bằng liên kết bên dưới.',
+      activationUrl: hasSmtp ? null : activationUrl,
     });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
