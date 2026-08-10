@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { signToken } from '@/lib/auth';
+import { signToken, hashPassword } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
@@ -10,8 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Email là bắt buộc để đăng nhập bằng Google' }, { status: 400 });
     }
 
-    const username = email.split('@')[0] || `google_${Date.now()}`;
-    const fullname = name || username;
+    const fullname = name || email.split('@')[0];
 
     // Check if account exists by email
     let { data: account } = await supabaseAdmin
@@ -33,12 +32,17 @@ export async function POST(req: Request) {
         counter++;
       }
 
+      // Generate placeholder password for OAuth user to satisfy NOT NULL constraint
+      const randomSecret = `GOOGLE_OAUTH_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+      const hashedPassword = hashPassword(randomSecret);
+
       // Create customer account for Google user in database
       const { data: newAcc, error: createErr } = await supabaseAdmin
         .from('accounts')
         .insert({
           username,
           email,
+          password: hashedPassword,
           fullname,
           role: 'customer',
           active: true,

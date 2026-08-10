@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
-import { signToken } from '@/lib/auth';
+import { signToken, hashPassword } from '@/lib/auth';
 
 export async function GET(req: Request) {
   try {
@@ -19,10 +19,14 @@ export async function GET(req: Request) {
         let { data: account } = await supabaseAdmin.from('accounts').select('*').eq('email', email).maybeSingle();
 
         if (!account) {
+          const randomSecret = `GOOGLE_OAUTH_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+          const hashedPassword = hashPassword(randomSecret);
+
           // Create new customer account from Google OAuth
           const { data: newAccount } = await supabaseAdmin.from('accounts').insert({
             username,
             email,
+            password: hashedPassword,
             fullname,
             role: 'customer',
             active: true,
