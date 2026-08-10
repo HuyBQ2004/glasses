@@ -192,7 +192,7 @@ export default function ProductsPage() {
             <p className="text-neutral-400 font-semibold">Không tìm thấy mẫu kính nào phù hợp với bộ lọc.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {products.map((product, idx) => {
               const prodId = product.id || product._id || `prod-${idx}`;
               return (
@@ -206,44 +206,44 @@ export default function ProductsPage() {
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <span className="absolute top-3 left-3 bg-neutral-950/80 backdrop-blur-sm text-amber-400 font-bold text-[11px] px-2.5 py-1 rounded-full border border-neutral-800">
+                    <span className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-neutral-950/80 backdrop-blur-sm text-amber-400 font-bold text-[9px] sm:text-[11px] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-neutral-800">
                       {product.manufacturer || 'Eyewear'}
                     </span>
                     {product.frame_shape && (
-                      <span className="absolute bottom-3 left-3 bg-indigo-950/80 backdrop-blur-sm text-indigo-300 font-medium text-[10px] px-2 py-0.5 rounded-full border border-indigo-800/50">
+                      <span className="hidden sm:inline-block absolute bottom-3 left-3 bg-indigo-950/80 backdrop-blur-sm text-indigo-300 font-medium text-[10px] px-2 py-0.5 rounded-full border border-indigo-800/50">
                         {product.frame_shape}
                       </span>
                     )}
                   </Link>
 
-                  <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center gap-1 text-amber-400 text-xs font-bold mb-1">
-                        <Star className="w-3.5 h-3.5 fill-amber-400" /> 5.0 (Review)
+                      <div className="flex items-center gap-1 text-amber-400 text-[10px] sm:text-xs font-bold mb-1">
+                        <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-400" /> 5.0 (Review)
                       </div>
                       <Link href={`/products/${prodId}`}>
-                        <h3 className="font-bold text-white text-base line-clamp-1 group-hover:text-amber-400 transition-colors">
+                        <h3 className="font-bold text-white text-xs sm:text-base line-clamp-1 group-hover:text-amber-400 transition-colors">
                           {product.name}
                         </h3>
                       </Link>
-                      <p className="text-xs text-neutral-400 line-clamp-2 mt-1 font-normal">
+                      <p className="text-xs text-neutral-400 line-clamp-2 mt-1 font-normal hidden sm:block">
                         {product.description || product.title}
                       </p>
                     </div>
 
-                    <div className="pt-4 mt-4 border-t border-neutral-800 flex items-center justify-between">
+                    <div className="pt-2 sm:pt-4 mt-2 sm:mt-4 border-t border-neutral-800 flex items-center justify-between gap-1">
                       <div>
-                        <span className="block text-[10px] text-neutral-500 uppercase font-semibold">Giá Bán</span>
-                        <span className="font-black text-amber-400 text-lg">
+                        <span className="block text-[9px] sm:text-[10px] text-neutral-500 uppercase font-semibold">Giá Bán</span>
+                        <span className="font-black text-amber-400 text-xs sm:text-lg">
                           {Number(product.price).toLocaleString('vi-VN')}đ
                         </span>
                       </div>
                       <button
                         onClick={() => handleAddToCart(prodId)}
-                        className="p-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold transition-all shadow-md"
+                        className="p-2 sm:p-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold transition-all shadow-md shrink-0"
                         title="Thêm vào giỏ hàng"
                       >
-                        <ShoppingBag className="w-5 h-5" />
+                        <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     </div>
                   </div>

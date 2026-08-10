@@ -114,53 +114,57 @@ export default function CartPage() {
                 return (
                   <div
                     key={item._id}
-                    className="flex items-center gap-4 p-5 rounded-3xl bg-neutral-900 border border-neutral-800 hover:border-neutral-750 transition-all shadow-lg"
+                    className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 rounded-3xl bg-neutral-900 border border-neutral-800 hover:border-neutral-750 transition-all shadow-lg"
                   >
-                    <img
-                      src={prod.image}
-                      alt={prod.name}
-                      className="w-24 h-24 object-cover rounded-2xl bg-neutral-800 border border-neutral-750"
-                    />
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={prod.image}
+                        alt={prod.name}
+                        className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-2xl bg-neutral-800 border border-neutral-750 shrink-0"
+                      />
 
-                    <div className="flex-1">
-                      <h4 className="font-bold text-white text-base line-clamp-1">{prod.name}</h4>
-                      <p className="text-xs text-neutral-400 mt-0.5">{prod.manufacturer || 'Eyewear Boutique'}</p>
-                      <p className="text-xs text-amber-400 font-bold mt-1">
-                        {Number(prod.price).toLocaleString('vi-VN')}đ / chiếc
-                      </p>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-white text-sm sm:text-base line-clamp-1">{prod.name}</h4>
+                        <p className="text-xs text-neutral-400 mt-0.5">{prod.manufacturer || 'Eyewear Boutique'}</p>
+                        <p className="text-xs text-amber-400 font-bold mt-1">
+                          {Number(prod.price).toLocaleString('vi-VN')}đ / chiếc
+                        </p>
+                      </div>
+                    </div>
 
-                      <div className="flex items-center gap-4 mt-3">
-                        <div className="flex items-center bg-neutral-800 rounded-xl border border-neutral-700 overflow-hidden">
-                          <button
-                            onClick={() => handleUpdateQuantity(prod._id, item.amount - 1)}
-                            className="px-3 py-1 font-black text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors"
-                          >
-                            -
-                          </button>
-                          <span className="px-3.5 py-1 text-sm font-bold text-white bg-neutral-850">{item.amount}</span>
-                          <button
-                            onClick={() => handleUpdateQuantity(prod._id, item.amount + 1)}
-                            className="px-3 py-1 font-black text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors"
-                          >
-                            +
-                          </button>
+                    <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-800/80">
+                      <div className="flex items-center bg-neutral-800 rounded-xl border border-neutral-700 overflow-hidden">
+                        <button
+                          onClick={() => handleUpdateQuantity(prod._id, item.amount - 1)}
+                          className="px-3 py-1 font-black text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors text-sm"
+                        >
+                          -
+                        </button>
+                        <span className="px-3 py-1 text-sm font-bold text-white bg-neutral-850">{item.amount}</span>
+                        <button
+                          onClick={() => handleUpdateQuantity(prod._id, item.amount + 1)}
+                          className="px-3 py-1 font-black text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors text-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <span className="text-[10px] text-neutral-500 block font-bold uppercase tracking-wider">Thành Tiền</span>
+                          <span className="font-black text-amber-400 text-base sm:text-xl">
+                            {Number(prod.price * item.amount).toLocaleString('vi-VN')}đ
+                          </span>
                         </div>
 
                         <button
                           onClick={() => handleRemoveItem(prod._id)}
-                          className="text-neutral-400 hover:text-rose-400 p-1.5 hover:bg-rose-500/10 rounded-xl transition-colors"
+                          className="text-neutral-400 hover:text-rose-400 p-1.5 hover:bg-rose-500/10 rounded-xl transition-colors ml-1"
                           title="Xóa kính khỏi giỏ hàng"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                    </div>
-
-                    <div className="text-right pl-2">
-                      <span className="text-[11px] text-neutral-500 block font-bold uppercase tracking-wider">Thành Tiền</span>
-                      <span className="font-black text-amber-400 text-lg sm:text-xl">
-                        {Number(prod.price * item.amount).toLocaleString('vi-VN')}đ
-                      </span>
                     </div>
                   </div>
                 );

@@ -93,26 +93,26 @@ function OrdersContent() {
             return (
               <div
                 key={ordId}
-                className="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-6 space-y-5 hover:border-neutral-750 transition-all shadow-xl"
+                className="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-5 hover:border-neutral-750 transition-all shadow-xl"
               >
                 {/* Order Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-neutral-800 pb-4">
                   <div>
-                    <span className="text-sm font-mono font-black text-amber-400">
+                    <span className="text-xs sm:text-sm font-mono font-black text-amber-400">
                       Mã Đơn: #{ordId.slice(-6).toUpperCase()}
                     </span>
-                    <p className="text-xs text-neutral-400 mt-1">
+                    <p className="text-[11px] sm:text-xs text-neutral-400 mt-0.5">
                       Ngày đặt:{' '}
                       {new Date(order.created_at || order.create_date || Date.now()).toLocaleString('vi-VN')}
                     </p>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`px-3 py-1 rounded-full border text-xs font-bold ${statusBadge}`}>
+                    <span className={`px-2.5 py-1 rounded-full border text-[11px] sm:text-xs font-bold ${statusBadge}`}>
                       {statusText}
                     </span>
                     <span
-                      className={`px-3 py-1 rounded-full border text-xs font-bold ${
+                      className={`px-2.5 py-1 rounded-full border text-[11px] sm:text-xs font-bold ${
                         isPaid
                           ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                           : 'bg-neutral-800 text-neutral-300 border-neutral-700'
@@ -138,10 +138,10 @@ function OrdersContent() {
                             />
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-white text-sm truncate">{item.product_name}</p>
+                            <p className="font-bold text-white text-xs sm:text-sm truncate">{item.product_name}</p>
                             <p className="text-xs text-neutral-400">Số lượng: {item.quantity}</p>
                           </div>
-                          <span className="font-black text-amber-400 text-sm shrink-0">
+                          <span className="font-black text-amber-400 text-xs sm:text-sm shrink-0">
                             {Number(item.product_price * item.quantity).toLocaleString('vi-VN')}đ
                           </span>
                         </div>
@@ -161,7 +161,7 @@ function OrdersContent() {
 
                   <div className="md:text-right flex flex-col justify-center">
                     <span className="text-xs text-neutral-400 font-semibold uppercase">Tổng Giá Trị Đơn Hàng</span>
-                    <span className="text-2xl font-black text-amber-400 mt-0.5">
+                    <span className="text-xl sm:text-2xl font-black text-amber-400 mt-0.5">
                       {totalPrice.toLocaleString('vi-VN')}đ
                     </span>
                   </div>
