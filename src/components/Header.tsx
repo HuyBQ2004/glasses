@@ -114,21 +114,44 @@ export default function Header() {
           </button>
         </form>
 
-        {/* 3. THEME TOGGLE & AVATAR / USER PROFILE */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* 3. CUSTOMER ACTION ICONS (CART & ORDERS), THEME & AVATAR */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           
+          {/* Order History Link */}
+          <Link
+            href="/orders"
+            title="Lịch Sử Đơn Hàng Của Tôi"
+            className="p-2.5 rounded-full bg-neutral-800 hover:bg-neutral-750 text-neutral-300 hover:text-amber-400 transition-all border border-neutral-700/80 shadow-md"
+          >
+            <Package className="w-4.5 h-4.5" />
+          </Link>
+
+          {/* Cart Icon with Counter Badge */}
+          <Link
+            href="/cart"
+            title="Giỏ Hàng Của Bạn"
+            className="relative p-2.5 rounded-full bg-neutral-800 hover:bg-neutral-750 text-neutral-300 hover:text-amber-400 transition-all border border-neutral-700/80 shadow-md"
+          >
+            <ShoppingBag className="w-4.5 h-4.5" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-amber-500 text-neutral-950 font-black text-[11px] w-5 h-5 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                {cartCount}
+              </span>
+            )}
+          </Link>
+
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
             title={theme === 'dark' ? 'Chuyển sang Giao diện Sáng' : 'Chuyển sang Giao diện Tối'}
             className="p-2.5 rounded-full bg-neutral-800 hover:bg-neutral-750 text-amber-400 hover:text-amber-300 transition-all border border-neutral-700/80 shadow-md"
           >
-            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+            {theme === 'dark' ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5 text-indigo-400" />}
           </button>
 
           {/* Avatar Profile / Login Icon */}
           {user ? (
-            <div className="relative group">
+            <div className="relative group ml-1">
               <button className="flex items-center gap-2 p-1 rounded-full bg-neutral-800 border border-neutral-700 hover:border-amber-500/60 transition-all shadow-md">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-rose-500 flex items-center justify-center font-black text-neutral-950 text-sm uppercase shadow-sm">
                   {user.username.slice(0, 2)}
@@ -183,7 +206,7 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className="w-10 h-10 rounded-full bg-neutral-800 border border-neutral-700 hover:border-amber-500 text-amber-400 hover:bg-neutral-750 transition-all flex items-center justify-center shadow-md"
+              className="w-10 h-10 rounded-full bg-neutral-800 border border-neutral-700 hover:border-amber-500 text-amber-400 hover:bg-neutral-750 transition-all flex items-center justify-center shadow-md ml-1"
               title="Đăng Nhập Tài Khoản"
             >
               <User className="w-5 h-5" />

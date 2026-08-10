@@ -14,9 +14,17 @@ export async function GET() {
     const { count: totalUsers } = await supabase.from('accounts').select('*', { count: 'exact', head: true });
     const { count: totalFeedbacks } = await supabase.from('feedbacks').select('*', { count: 'exact', head: true });
 
-    // Total Revenue
-    const { data: orders } = await supabase.from('orders').select('total_price');
-    const totalRevenue = (orders || []).reduce((sum, order) => sum + (Number(order.total_price) || 0), 0);
+    // Total Revenue (Calculated ONLY for successful/paid/completed orders)
+    const { data: orders } = await supabase
+      .from('orders')
+      .select('total_price, payment_status, status');
+
+    const totalRevenue = (orders || []).reduce((sum, order) => {
+      const pStatus = (order.payment_status || '').toLowerCase();
+      const oStatus = (order.status || '').toLowerCase();
+      const isSuccess = pStatus === 'paid' || oStatus === 'completed' || oStatus === 'delivered' || oStatus === 'da_giao' || pStatus === 'da_thanh_toan';
+      return isSuccess ? sum + (Number(order.total_price) || 0) : sum;
+    }, 0);
 
     // Recent orders
     const { data: recentOrders } = await supabase

@@ -32,11 +32,16 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
-    // If delivered and payment was COD, update payment_status to Paid
+    // Sync order status and payment status when shipping updates
     if (status === 'Delivered') {
       await supabase
         .from('orders')
-        .update({ payment_status: 'Paid' })
+        .update({ payment_status: 'paid', status: 'completed' })
+        .eq('shipping_id', id);
+    } else if (status === 'Cancelled') {
+      await supabase
+        .from('orders')
+        .update({ payment_status: 'cancelled', status: 'cancelled' })
         .eq('shipping_id', id);
     }
 

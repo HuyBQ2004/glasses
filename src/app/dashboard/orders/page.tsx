@@ -60,7 +60,12 @@ export default function AdminOrdersPage() {
     return currentStatus.toLowerCase() === statusFilter.toLowerCase();
   });
 
-  const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.total_price || o.totalPrice) || 0), 0);
+  const totalRevenue = orders.reduce((sum, o) => {
+    const pStatus = (o.payment_status || '').toLowerCase();
+    const oStatus = (o.status || o.shipping_id?.status || '').toLowerCase();
+    const isPaid = pStatus === 'paid' || oStatus === 'completed' || oStatus === 'delivered' || oStatus === 'da_giao' || pStatus === 'da_thanh_toan';
+    return isPaid ? sum + (Number(o.total_price || o.totalPrice) || 0) : sum;
+  }, 0);
 
   return (
     <div className="space-y-8">
