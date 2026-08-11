@@ -19,11 +19,16 @@ html.light body {
 
 /* Dark-to-Light Backgrounds */
 html.light .bg-neutral-950,
+html.light .bg-neutral-950\/98,
+html.light .bg-neutral-950\/95,
+html.light .bg-neutral-950\/90,
 html.light .bg-black {
   background-color: #f8fafc !important;
 }
 
 html.light .bg-neutral-900,
+html.light .bg-neutral-900\/98,
+html.light .bg-neutral-900\/95,
 html.light .bg-neutral-900\/90,
 html.light .bg-neutral-900\/80,
 html.light .bg-neutral-900\/60,
@@ -93,6 +98,12 @@ html.light select {
   border-color: #cbd5e1 !important;
 }
 
+html.light select option,
+html.light option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
 html.light input::placeholder,
 html.light textarea::placeholder {
   color: #94a3b8 !important;
@@ -113,9 +124,14 @@ html.light header nav a:hover {
   color: #f59e0b !important;
 }
 
-/* Hero Badge & Overlays */
-html.light .bg-neutral-950\/80,
-html.light .bg-neutral-950\/40 {
+/* Translucent Backdrops in Light Mode */
+html.light .fixed.inset-0.bg-neutral-950\/80,
+html.light div.fixed.bg-neutral-950\/80 {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+/* Badges & Overlays in Light Mode */
+html.light span.bg-neutral-950\/80 {
   background-color: rgba(255, 255, 255, 0.9) !important;
   color: #0f172a !important;
   border-color: #e2e8f0 !important;
@@ -149,7 +165,7 @@ html.light .hover\:bg-neutral-700:hover {
   color: #d97706 !important;
 }
 
-/* Category Filter Buttons in Light Mode */
+/* Category & Brand Filter Buttons in Light Mode */
 html.light .bg-neutral-800.text-neutral-400 {
   background-color: #e2e8f0 !important;
   color: #475569 !important;
