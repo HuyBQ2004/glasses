@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import CloudflareTurnstile from '@/components/CloudflareTurnstile';
 import { User, Lock, Mail, Phone, MapPin, ArrowRight, CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -19,7 +18,6 @@ export default function SignupPage() {
     phone: '',
     address: '',
   });
-  const [turnstileToken, setTurnstileToken] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -59,7 +57,7 @@ export default function SignupPage() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, turnstileToken }),
+        body: JSON.stringify(formData),
       });
       const data = await res.json();
 
@@ -315,9 +313,6 @@ export default function SignupPage() {
                     className="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-3 px-4 text-sm text-white focus:border-amber-500 focus:outline-none"
                   />
                 </div>
-
-                {/* Cloudflare Anti-Bot Turnstile Widget */}
-                <CloudflareTurnstile onVerify={(token) => setTurnstileToken(token)} />
 
                 <button
                   type="submit"

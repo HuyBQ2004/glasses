@@ -4,12 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import CloudflareTurnstile from '@/components/CloudflareTurnstile';
 import { Mail, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const [turnstileToken, setTurnstileToken] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -111,9 +109,6 @@ export default function ForgotPasswordPage() {
                   <Mail className="w-5 h-5 text-neutral-400 absolute left-3.5 top-3" />
                 </div>
               </div>
-
-              {/* Cloudflare Anti-Bot Turnstile Widget */}
-              <CloudflareTurnstile onVerify={(token) => setTurnstileToken(token)} />
 
               <button
                 type="submit"

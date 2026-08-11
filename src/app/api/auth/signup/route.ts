@@ -2,21 +2,14 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { hashPassword } from '@/lib/auth';
 import { sendActivationEmail } from '@/lib/email';
-import { verifyTurnstileToken } from '@/lib/turnstile';
 import crypto from 'crypto';
 
 export async function POST(req: Request) {
   try {
-    const { username, password, fullname, email, phone, address, turnstileToken } = await req.json();
+    const { username, password, fullname, email, phone, address } = await req.json();
 
     if (!username || !password) {
       return NextResponse.json({ success: false, error: 'Tên đăng nhập và mật khẩu là bắt buộc' }, { status: 400 });
-    }
-
-    // Verify Cloudflare Turnstile Bot Protection
-    const turnstileResult = await verifyTurnstileToken(turnstileToken);
-    if (!turnstileResult.success) {
-      return NextResponse.json({ success: false, error: turnstileResult.error }, { status: 400 });
     }
 
     // Password Complexity Validation (Min 8 chars, uppercase, lowercase, number, special char)
