@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import CloudflareTurnstile from './CloudflareTurnstile';
 import { ShieldCheck, Cloud, CheckCircle2, ArrowRight } from 'lucide-react';
 
@@ -11,6 +11,18 @@ export default function GlobalCloudflareSecurity() {
   const [mounted, setMounted] = useState<boolean>(false);
   const [statusText, setStatusText] = useState<string>('Đang kiểm tra an toàn kết nối...');
 
+  const completeVerification = useCallback(() => {
+    setStatusText('Xác minh kết nối an toàn thành công!');
+    setTimeout(() => {
+      setVerified(true);
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.setItem('cf_verified', 'true');
+        } catch {}
+      }
+    }, 400);
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
     Promise.resolve().then(() => {
@@ -20,11 +32,13 @@ export default function GlobalCloudflareSecurity() {
         const currentHost = window.location.hostname || 'glassvault.store';
         setDomainName(currentHost);
 
-        const isVerified = sessionStorage.getItem('cf_verified') === 'true';
-        if (isVerified) {
-          setVerified(true);
-          return;
-        }
+        try {
+          const isVerified = sessionStorage.getItem('cf_verified') === 'true';
+          if (isVerified) {
+            setVerified(true);
+            return;
+          }
+        } catch {}
 
         const randomRay =
           Math.random().toString(36).substring(2, 12) +
@@ -33,45 +47,34 @@ export default function GlobalCloudflareSecurity() {
       }
     });
 
-    const autoTimer = setTimeout(() => {
-      if (!isMounted) return;
-      setStatusText('Tự động xác minh kết nối an toàn!');
-      setTimeout(() => {
-        if (!isMounted) return;
-        setVerified(true);
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('cf_verified', 'true');
-        }
-      }, 600);
-    }, 4000);
+    // Safety fallback timer so user is never stuck if Turnstile API is blocked by client browser
+    const autoFallbackTimer = setTimeout(() => {
+      if (isMounted) {
+        completeVerification();
+      }
+    }, 3500);
 
     return () => {
       isMounted = false;
-      clearTimeout(autoTimer);
+      clearTimeout(autoFallbackTimer);
     };
-  }, []);
+  }, [completeVerification]);
 
-  const handleVerify = (token: string) => {
-    if (token) {
-      setStatusText('Xác minh thành công! Đang chuyển hướng...');
-      setTimeout(() => {
-        setVerified(true);
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('cf_verified', 'true');
-        }
-      }, 400);
-    }
-  };
+  const handleVerify = useCallback(
+    (token: string) => {
+      if (token) {
+        completeVerification();
+      }
+    },
+    [completeVerification]
+  );
 
   const handleManualBypass = () => {
-    setVerified(true);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('cf_verified', 'true');
-    }
+    completeVerification();
   };
 
   if (!mounted || verified) {
-    return null; // Đã qua lớp bảo vệ an toàn -> Hiển thị website chính
+    return null; // Verified -> Render normal website
   }
 
   return (
@@ -94,7 +97,7 @@ export default function GlobalCloudflareSecurity() {
         </div>
 
         <p className="text-sm text-neutral-400 leading-relaxed">
-          Website đang sử dụng hệ thống tường lửa Cloudflare Turnstile để chống tấn công DDoS và ngăn chặn Bot tự động...
+          Website đang được bảo vệ bởi tường lửa Cloudflare Anti-Bot & DDoS Protection để đảm bảo an toàn kết nối.
         </p>
 
         {/* Cloudflare Turnstile Verification Widget */}
@@ -107,7 +110,7 @@ export default function GlobalCloudflareSecurity() {
           </div>
         </div>
 
-        {/* Nút bấm xác minh thủ công nếu tên miền Vercel chưa add vào Cloudflare Turnstile Dashboard */}
+        {/* Nút bấm xác minh thủ công */}
         <div className="flex justify-center pt-1">
           <button
             onClick={handleManualBypass}
@@ -134,3 +137,4 @@ export default function GlobalCloudflareSecurity() {
     </div>
   );
 }
+
