@@ -6,26 +6,49 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get('code');
+    const user = await getCurrentUser();
 
     if (code) {
+      const upperCode = code.toUpperCase();
       const { data: voucher, error } = await supabase
         .from('vouchers')
         .select('*')
-        .eq('code', code.toUpperCase())
+        .eq('code', upperCode)
         .maybeSingle();
 
       if (error || !voucher) {
         return NextResponse.json({ success: false, error: 'Mã giảm giá không tồn tại' }, { status: 404 });
       }
+
+      // Check Expiration
       if (new Date(voucher.expiry_date) < new Date()) {
-        return NextResponse.json({ success: false, error: 'Mã giảm giá đã hết hạn' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Mã giảm giá này đã hết hạn' }, { status: 400 });
       }
+
+      // Check First-Order Restriction for KINH20
+      if (upperCode === 'KINH20' && user) {
+        const { count: orderCount } = await supabase
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .eq('account_id', user.id);
+
+        if (orderCount && orderCount > 0) {
+          return NextResponse.json({
+            success: false,
+            error: 'Mã ưu đãi KINH20 chỉ áp dụng cho đơn hàng đầu tiên của bạn!',
+          }, { status: 400 });
+        }
+      }
+
       return NextResponse.json({ success: true, voucher: { ...voucher, _id: voucher.id } });
     }
 
+    // Return only active & unexpired vouchers for list dropdown
+    const now = new Date().toISOString();
     const { data: vouchers, error } = await supabase
       .from('vouchers')
       .select('*')
+      .gte('expiry_date', now)
       .order('expiry_date', { ascending: true });
 
     if (error) {

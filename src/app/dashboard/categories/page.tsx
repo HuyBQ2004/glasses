@@ -111,8 +111,8 @@ export default function AdminCategoriesPage() {
             <p className="text-neutral-500 text-sm">Chưa có danh mục nào.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800">
+              <table className="w-full min-w-[500px] text-left text-sm">
+                <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800 whitespace-nowrap">
                   <tr>
                     <th className="p-3">Tên Danh Mục</th>
                     <th className="p-3">Nhà Sản Xuất</th>
@@ -123,10 +123,10 @@ export default function AdminCategoriesPage() {
                   {categories.map((c, idx) => {
                     const catId = c.id || c._id || `cat-row-${idx}`;
                     return (
-                      <tr key={catId} className="hover:bg-neutral-850">
-                        <td className="p-3 font-bold text-white">{c.cname}</td>
-                        <td className="p-3 text-amber-400 font-semibold">{c.manufacturer || 'N/A'}</td>
-                        <td className="p-3 font-mono text-xs text-neutral-500">{catId}</td>
+                      <tr key={catId} className="hover:bg-neutral-850 transition-colors">
+                        <td className="p-3 font-bold text-white whitespace-nowrap">{c.cname}</td>
+                        <td className="p-3 text-amber-400 font-semibold whitespace-nowrap">{c.manufacturer || 'N/A'}</td>
+                        <td className="p-3 font-mono text-xs text-neutral-500 whitespace-nowrap">{catId}</td>
                       </tr>
                     );
                   })}

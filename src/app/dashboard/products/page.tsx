@@ -150,7 +150,7 @@ export default function AdminProductsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-white tracking-tight">Quản Lý Sản Phẩm Kính Mắt</h1>
           <p className="text-sm text-neutral-400 mt-1">Thêm mới, tải ảnh trực tiếp, chỉnh sửa thông tin giá và tồn kho sản phẩm</p>
@@ -158,7 +158,7 @@ export default function AdminProductsPage() {
 
         <button
           onClick={handleOpenAddModal}
-          className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-sm shadow-lg flex items-center gap-2"
+          className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-sm shadow-lg flex items-center justify-center gap-2 shrink-0"
         >
           <Plus className="w-5 h-5" /> Thêm Mẫu Kính Mới
         </button>
@@ -168,9 +168,9 @@ export default function AdminProductsPage() {
       {loading ? (
         <div className="text-neutral-500 font-medium">Đang tải sản phẩm...</div>
       ) : (
-        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800">
+        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl sm:rounded-3xl p-3 sm:p-6 overflow-x-auto shadow-xl">
+          <table className="w-full min-w-[700px] text-left text-sm">
+            <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800 whitespace-nowrap">
               <tr>
                 <th className="p-3">Hình Ảnh</th>
                 <th className="p-3">Tên Kính Mắt</th>
@@ -183,16 +183,16 @@ export default function AdminProductsPage() {
             </thead>
             <tbody className="divide-y divide-neutral-800">
               {products.map((p) => (
-                <tr key={p.id || p._id} className="hover:bg-neutral-850">
-                  <td className="p-3">
+                <tr key={p.id || p._id} className="hover:bg-neutral-850 transition-colors">
+                  <td className="p-3 whitespace-nowrap">
                     <img src={p.image} alt={p.name} className="w-12 h-12 object-cover rounded-xl bg-neutral-800 border border-neutral-700" />
                   </td>
-                  <td className="p-3 font-bold text-white max-w-xs truncate">{p.name}</td>
-                  <td className="p-3 text-amber-400 font-semibold">{p.manufacturer || 'Ray-Ban'}</td>
-                  <td className="p-3 text-indigo-300 font-medium text-xs">{p.frame_shape || 'Thời trang'}</td>
-                  <td className="p-3 font-black text-white">{Number(p.price).toLocaleString('vi-VN')}đ</td>
-                  <td className="p-3 font-bold text-emerald-400">{p.quantity} chiếc</td>
-                  <td className="p-3 text-right">
+                  <td className="p-3 font-bold text-white max-w-xs truncate whitespace-nowrap">{p.name}</td>
+                  <td className="p-3 text-amber-400 font-semibold whitespace-nowrap">{p.manufacturer || 'Ray-Ban'}</td>
+                  <td className="p-3 text-indigo-300 font-medium text-xs whitespace-nowrap">{p.frame_shape || 'Thời trang'}</td>
+                  <td className="p-3 font-black text-white whitespace-nowrap">{Number(p.price).toLocaleString('vi-VN')}đ</td>
+                  <td className="p-3 font-bold text-emerald-400 whitespace-nowrap">{p.quantity} chiếc</td>
+                  <td className="p-3 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => handleOpenEditModal(p)}

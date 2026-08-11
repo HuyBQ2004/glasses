@@ -53,9 +53,9 @@ export default function AdminStaffPage() {
       {loading ? (
         <div className="text-neutral-500 font-medium">Đang tải danh sách tài khoản...</div>
       ) : (
-        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800">
+        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl sm:rounded-3xl p-3 sm:p-6 overflow-x-auto shadow-xl">
+          <table className="w-full min-w-[680px] text-left text-sm">
+            <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800 whitespace-nowrap">
               <tr>
                 <th className="p-3">Tài Khoản</th>
                 <th className="p-3">Họ và Tên</th>
@@ -67,16 +67,16 @@ export default function AdminStaffPage() {
             </thead>
             <tbody className="divide-y divide-neutral-800">
               {accounts.map((acc) => (
-                <tr key={acc._id} className="hover:bg-neutral-850">
-                  <td className="p-3 font-bold text-amber-400 font-mono">{acc.username}</td>
-                  <td className="p-3 font-semibold text-white">{acc.fullname || 'Chưa cập nhật'}</td>
-                  <td className="p-3 text-neutral-400 text-xs">
+                <tr key={acc.id || acc._id} className="hover:bg-neutral-850 transition-colors">
+                  <td className="p-3 font-bold text-amber-400 font-mono whitespace-nowrap">{acc.username}</td>
+                  <td className="p-3 font-semibold text-white whitespace-nowrap">{acc.fullname || 'Chưa cập nhật'}</td>
+                  <td className="p-3 text-neutral-400 text-xs whitespace-nowrap">
                     {acc.email || 'N/A'} <br /> {acc.phone}
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 whitespace-nowrap">
                     <select
                       value={acc.role}
-                      onChange={(e) => handleUpdateRole(acc._id, e.target.value, acc.active)}
+                      onChange={(e) => handleUpdateRole(acc.id || acc._id, e.target.value, acc.active)}
                       className="bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-1.5 text-xs font-bold text-amber-400 cursor-pointer focus:outline-none"
                     >
                       <option value="admin">admin (Quản trị hệ thống)</option>
@@ -84,14 +84,14 @@ export default function AdminStaffPage() {
                       <option value="customer">customer (Khách hàng)</option>
                     </select>
                   </td>
-                  <td className="p-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${acc.active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'}`}>
+                  <td className="p-3 whitespace-nowrap">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold inline-block ${acc.active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'}`}>
                       {acc.active ? 'Hoạt động' : 'Đã khóa'}
                     </span>
                   </td>
-                  <td className="p-3 text-right">
+                  <td className="p-3 text-right whitespace-nowrap">
                     <button
-                      onClick={() => handleUpdateRole(acc._id, acc.role, !acc.active)}
+                      onClick={() => handleUpdateRole(acc.id || acc._id, acc.role, !acc.active)}
                       className={`p-2 rounded-xl border text-xs font-bold ${acc.active ? 'bg-rose-500/20 text-rose-300 border-rose-500/30 hover:bg-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30'}`}
                       title={acc.active ? 'Khóa tài khoản' : 'Mở khóa'}
                     >

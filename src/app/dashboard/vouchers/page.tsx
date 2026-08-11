@@ -156,8 +156,8 @@ export default function AdminVouchersPage() {
             <p className="text-neutral-500 text-sm">Chưa có voucher nào.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800">
+              <table className="w-full min-w-[600px] text-left text-sm">
+                <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800 whitespace-nowrap">
                   <tr>
                     <th className="p-3">Mã Voucher</th>
                     <th className="p-3">% Giảm</th>
@@ -168,16 +168,16 @@ export default function AdminVouchersPage() {
                 </thead>
                 <tbody className="divide-y divide-neutral-800">
                   {vouchers.map((v) => (
-                    <tr key={v._id} className="hover:bg-neutral-850">
-                      <td className="p-3 font-mono font-bold text-amber-400">{v.code}</td>
-                      <td className="p-3 font-bold text-white">{v.discount_percent}%</td>
-                      <td className="p-3 text-neutral-300">
+                    <tr key={v.id || v._id} className="hover:bg-neutral-850 transition-colors">
+                      <td className="p-3 font-mono font-bold text-amber-400 whitespace-nowrap">{v.code}</td>
+                      <td className="p-3 font-bold text-white whitespace-nowrap">{v.discount_percent}%</td>
+                      <td className="p-3 text-neutral-300 whitespace-nowrap">
                         {v.max_discount ? `${Number(v.max_discount).toLocaleString('vi-VN')}đ` : 'Không giới hạn'}
                       </td>
-                      <td className="p-3 text-neutral-300">
+                      <td className="p-3 text-neutral-300 whitespace-nowrap">
                         {v.min_order_value ? `${Number(v.min_order_value).toLocaleString('vi-VN')}đ` : '0đ'}
                       </td>
-                      <td className="p-3 text-neutral-400 text-xs">
+                      <td className="p-3 text-neutral-400 text-xs whitespace-nowrap">
                         {new Date(v.expiry_date).toLocaleDateString('vi-VN')}
                       </td>
                     </tr>

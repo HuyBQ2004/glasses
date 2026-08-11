@@ -48,17 +48,46 @@ export async function POST(req: Request) {
     // 2. Discount handling
     let discountAmount = 0;
     if (voucherCode) {
+      const upperCode = voucherCode.toUpperCase();
       const { data: voucher } = await supabase
         .from('vouchers')
         .select('*')
-        .eq('code', voucherCode.toUpperCase())
+        .eq('code', upperCode)
         .maybeSingle();
 
-      if (voucher && new Date(voucher.expiry_date) > new Date() && subtotal >= (voucher.min_order_value || 0)) {
-        discountAmount = (subtotal * voucher.discount_percent) / 100;
-        if (voucher.max_discount && discountAmount > voucher.max_discount) {
-          discountAmount = voucher.max_discount;
+      if (!voucher) {
+        return NextResponse.json({ success: false, error: 'Mã giảm giá không tồn tại' }, { status: 400 });
+      }
+
+      if (new Date(voucher.expiry_date) <= new Date()) {
+        return NextResponse.json({ success: false, error: 'Mã giảm giá này đã hết hạn sử dụng' }, { status: 400 });
+      }
+
+      if (subtotal < (voucher.min_order_value || 0)) {
+        return NextResponse.json({
+          success: false,
+          error: `Đơn hàng chưa đạt giá trị tối thiểu (${Number(voucher.min_order_value).toLocaleString('vi-VN')}đ) để dùng mã này.`,
+        }, { status: 400 });
+      }
+
+      // First-order check for KINH20
+      if (upperCode === 'KINH20') {
+        const { count: orderCount } = await supabase
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .eq('account_id', user.id);
+
+        if (orderCount && orderCount > 0) {
+          return NextResponse.json({
+            success: false,
+            error: 'Mã ưu đãi KINH20 chỉ áp dụng cho đơn hàng đầu tiên của bạn!',
+          }, { status: 400 });
         }
+      }
+
+      discountAmount = (subtotal * voucher.discount_percent) / 100;
+      if (voucher.max_discount && discountAmount > voucher.max_discount) {
+        discountAmount = voucher.max_discount;
       }
     }
 

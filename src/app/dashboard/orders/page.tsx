@@ -115,9 +115,9 @@ export default function AdminOrdersPage() {
           <p className="text-neutral-400 font-semibold">Không tìm thấy đơn hàng nào trong mục này.</p>
         </div>
       ) : (
-        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800">
+        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl sm:rounded-3xl p-3 sm:p-6 overflow-x-auto shadow-xl">
+          <table className="w-full min-w-[750px] text-left text-sm">
+            <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800 whitespace-nowrap">
               <tr>
                 <th className="p-3">Mã Đơn Hàng</th>
                 <th className="p-3">Khách Hàng</th>
@@ -136,22 +136,22 @@ export default function AdminOrdersPage() {
                 const paymentStatus = ord.payment_status || 'Pending';
 
                 return (
-                  <tr key={ordId} className="hover:bg-neutral-850">
-                    <td className="p-3 font-mono font-bold text-amber-400">#{ordId.slice(-6).toUpperCase()}</td>
-                    <td className="p-3 font-semibold text-white">
+                  <tr key={ordId} className="hover:bg-neutral-850 transition-colors">
+                    <td className="p-3 font-mono font-bold text-amber-400 whitespace-nowrap">#{ordId.slice(-6).toUpperCase()}</td>
+                    <td className="p-3 font-semibold text-white whitespace-nowrap">
                       {ord.shipping_id?.name || ord.account?.fullname || ord.account?.username || 'Khách Hàng'}
                     </td>
-                    <td className="p-3 text-neutral-300 font-mono">{ord.shipping_id?.phone || ord.account?.phone || '---'}</td>
-                    <td className="p-3 font-black text-white">{Number(ord.total_price || ord.totalPrice).toLocaleString('vi-VN')}đ</td>
-                    <td className="p-3">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                    <td className="p-3 text-neutral-300 font-mono whitespace-nowrap">{ord.shipping_id?.phone || ord.account?.phone || '---'}</td>
+                    <td className="p-3 font-black text-white whitespace-nowrap">{Number(ord.total_price || ord.totalPrice).toLocaleString('vi-VN')}đ</td>
+                    <td className="p-3 whitespace-nowrap">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold inline-block ${
                         paymentStatus === 'Paid' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                       }`}>
                         {ord.payment_method || 'COD'} ({paymentStatus === 'Paid' ? 'Đã thanh toán' : 'Chưa thanh toán'})
                       </span>
                     </td>
-                    <td className="p-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                    <td className="p-3 whitespace-nowrap">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold border inline-block ${
                         status === 'Delivered' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
                         status === 'Shipping' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
                         status === 'Cancelled' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' :
@@ -162,7 +162,7 @@ export default function AdminOrdersPage() {
                          status === 'Cancelled' ? '❌ Đã Hủy' : '⏳ Chờ Xử Lý'}
                       </span>
                     </td>
-                    <td className="p-3 text-right">
+                    <td className="p-3 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         <select
                           value={status}

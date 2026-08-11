@@ -140,8 +140,8 @@ export default function StockImportPage() {
             <p className="text-neutral-500 text-sm">Chưa có nhật ký nhập kho nào.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800">
+              <table className="w-full min-w-[600px] text-left text-sm">
+                <thead className="text-xs text-neutral-400 uppercase bg-neutral-950/60 border-b border-neutral-800 whitespace-nowrap">
                   <tr>
                     <th className="p-3">Sản Phẩm</th>
                     <th className="p-3">Số Lượng Nhập</th>
@@ -152,14 +152,14 @@ export default function StockImportPage() {
                 </thead>
                 <tbody className="divide-y divide-neutral-800">
                   {imports.map((imp) => (
-                    <tr key={imp._id} className="hover:bg-neutral-850">
-                      <td className="p-3 font-bold text-white max-w-xs truncate">{imp.product_id?.name}</td>
-                      <td className="p-3 font-black text-amber-400">+{imp.import_quantity} đôi</td>
-                      <td className="p-3 text-neutral-300">{imp.created_by?.fullname || 'Thủ Kho'}</td>
-                      <td className="p-3 text-neutral-400 text-xs">
-                        {new Date(imp.createdAt).toLocaleDateString('vi-VN')}
+                    <tr key={imp.id || imp._id} className="hover:bg-neutral-850 transition-colors">
+                      <td className="p-3 font-bold text-white max-w-xs truncate whitespace-nowrap">{imp.product_id?.name}</td>
+                      <td className="p-3 font-black text-amber-400 whitespace-nowrap">+{imp.import_quantity} chiếc</td>
+                      <td className="p-3 text-neutral-300 whitespace-nowrap">{imp.created_by?.fullname || 'Thủ Kho'}</td>
+                      <td className="p-3 text-neutral-400 text-xs whitespace-nowrap">
+                        {new Date(imp.created_at || imp.createdAt || Date.now()).toLocaleDateString('vi-VN')}
                       </td>
-                      <td className="p-3 text-neutral-400 text-xs italic">{imp.note || '---'}</td>
+                      <td className="p-3 text-neutral-400 text-xs italic whitespace-nowrap">{imp.note || '---'}</td>
                     </tr>
                   ))}
                 </tbody>
