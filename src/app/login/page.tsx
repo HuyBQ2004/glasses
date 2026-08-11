@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { useRouter as useAppRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Lock, User, ArrowRight } from 'lucide-react';
+import { Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
   const router = useAppRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -148,14 +149,22 @@ export default function LoginPage() {
               </div>
               <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Nhập mật khẩu"
-                  className="w-full bg-neutral-800 border border-neutral-700/80 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                  className="w-full bg-neutral-800 border border-neutral-700/80 rounded-xl py-3 pl-11 pr-11 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
                 />
                 <Lock className="w-5 h-5 text-neutral-400 absolute left-3.5 top-3" />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3 text-neutral-400 hover:text-amber-400 transition-colors"
+                  title={showPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
 

@@ -118,15 +118,6 @@ export default function SignupPage() {
               <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
               <h3 className="text-lg font-bold text-white">Đăng Ký Thành Công! ✉️</h3>
               <p className="text-sm text-neutral-300 leading-relaxed">{successMsg}</p>
-
-              <div className="pt-1 border-t border-neutral-800/80 mt-3">
-                <Link
-                  href="/login"
-                  className="inline-block px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-sm shadow-md mt-2"
-                >
-                  Đi Đến Trang Đăng Nhập
-                </Link>
-              </div>
             </div>
           ) : (
             <>

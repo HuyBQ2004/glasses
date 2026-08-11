@@ -3,12 +3,14 @@ import nodemailer from 'nodemailer';
 interface SendActivationEmailOptions {
   to: string;
   username: string;
+  fullname?: string;
   token: string;
   appUrl: string;
 }
 
-export async function sendActivationEmail({ to, username, token, appUrl }: SendActivationEmailOptions) {
+export async function sendActivationEmail({ to, username, fullname, token, appUrl }: SendActivationEmailOptions) {
   const activationUrl = `${appUrl}/verify-email?token=${token}&username=${encodeURIComponent(username)}`;
+  const displayName = fullname || username;
 
   const smtpHost = process.env.SMTP_HOST;
   const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587;
@@ -38,7 +40,7 @@ export async function sendActivationEmail({ to, username, token, appUrl }: SendA
               <h2 style="color: #f59e0b; margin: 8px 0 0 0;">GLASSVAULT Eyewear</h2>
             </div>
             <h3 style="text-align: center; color: #ffffff; margin-bottom: 16px;">Kích Hoạt Tài Khoản Mới</h3>
-            <p style="color: #e4e4e7; line-height: 1.6;">Xin chào <strong>${username}</strong>,</p>
+            <p style="color: #e4e4e7; line-height: 1.6;">Xin chào <strong>${displayName}</strong>,</p>
             <p style="color: #a1a1aa; line-height: 1.6;">Cảm ơn bạn đã đăng ký tài khoản tại <strong>GLASSVAULT Luxury Eyewear Boutique</strong>. Vui lòng nhấp vào nút bên dưới để kích hoạt tài khoản của bạn:</p>
             <div style="text-align: center; margin: 32px 0;">
               <a href="${activationUrl}" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #09090b; padding: 14px 32px; font-weight: bold; border-radius: 12px; text-decoration: none; display: inline-block; font-size: 15px;">Kích Hoạt Tài Khoản Ngay</a>

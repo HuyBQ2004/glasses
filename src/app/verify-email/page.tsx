@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
 
 function VerifyEmailContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
-  const username = searchParams.get('username');
 
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
@@ -28,7 +28,7 @@ function VerifyEmailContent() {
       return;
     }
 
-    fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}&username=${encodeURIComponent(username || '')}`)
+    fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}`)
       .then((res) => res.json())
       .then((data) => {
         if (!isMounted) return;
@@ -53,7 +53,16 @@ function VerifyEmailContent() {
     return () => {
       isMounted = false;
     };
-  }, [token, username]);
+  }, [token]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        router.push('/login');
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [success, router]);
 
   return (
     <main className="flex-1 flex items-center justify-center py-20 px-4">
@@ -71,12 +80,13 @@ function VerifyEmailContent() {
             </div>
             <h2 className="text-2xl font-black text-white">Kích Hoạt Thành Công! 🎉</h2>
             <p className="text-sm text-neutral-300">{message}</p>
+            <p className="text-xs text-amber-400 font-medium">Tự động chuyển đến trang đăng nhập sau 2.5 giây...</p>
             <div className="pt-2">
               <Link
-                href="/"
+                href="/login"
                 className="w-full py-3.5 rounded-xl font-bold bg-amber-500 hover:bg-amber-400 text-neutral-950 transition-all shadow-lg text-sm inline-flex items-center justify-center gap-2"
               >
-                Về Trang Chủ Mua Sắm <ArrowRight className="w-4 h-4" />
+                Đến Trang Đăng Nhập Ngay <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>

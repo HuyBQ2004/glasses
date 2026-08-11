@@ -6,21 +6,19 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const token = searchParams.get('token');
-    const username = searchParams.get('username');
 
     if (!token) {
       return NextResponse.json({ success: false, error: 'Mã xác thực không hợp lệ' }, { status: 400 });
     }
 
-    let query = supabase.from('accounts').select('*').eq('token', token);
-    if (username) {
-      query = query.eq('username', username);
-    }
-
-    const { data: user, error } = await query.maybeSingle();
+    const { data: user, error } = await supabase
+      .from('accounts')
+      .select('*')
+      .eq('token', token)
+      .maybeSingle();
 
     if (error || !user) {
-      return NextResponse.json({ success: false, error: 'Liên kết kích hoạt không tồn tại hoặc đã hết hạn' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Liên kết kích hoạt không tồn tại hoặc đã được sử dụng' }, { status: 404 });
     }
 
     // Update user active status to true

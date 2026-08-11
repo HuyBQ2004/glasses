@@ -74,7 +74,8 @@ export async function POST(req: Request) {
     // Send Activation Email (ignoring any SMTP failures)
     await sendActivationEmail({
       to: email,
-      username: user.fullname || user.username,
+      username: user.username,
+      fullname: user.fullname,
       token: activationToken,
       appUrl,
     });

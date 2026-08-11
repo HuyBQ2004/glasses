@@ -65,15 +65,6 @@ export default function ForgotPasswordPage() {
               <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
               <h3 className="text-lg font-bold text-white">Đã Gửi Email Khôi Phục! ✉️</h3>
               <p className="text-sm text-neutral-300 leading-relaxed">{successMsg}</p>
-
-              <div className="pt-2 border-t border-neutral-800/80 mt-2">
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-2 text-amber-400 font-bold text-sm hover:underline"
-                >
-                  <ArrowLeft className="w-4 h-4" /> Quay lại trang Đăng nhập
-                </Link>
-              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
