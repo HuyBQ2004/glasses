@@ -16,7 +16,8 @@ import {
   Home,
   ShoppingBag,
   Menu,
-  X
+  X,
+  Activity
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -40,7 +41,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         // --- STRICT PAGE PROTECTION LOGIC ---
         if (role === 'owner') {
-          if (pathname === '/dashboard/staff') {
+          if (pathname === '/dashboard/staff' || pathname === '/dashboard/logs') {
             router.replace('/dashboard');
             return;
           }
@@ -91,6 +92,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           }`}
         >
           <Users className="w-4 h-4" /> Quản Lý Tài Khoản (Admin)
+        </Link>
+      )}
+
+      {isAdmin && (
+        <Link
+          href="/dashboard/logs"
+          onClick={() => setIsMobileSidebarOpen(false)}
+          className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors ${
+            pathname === '/dashboard/logs' ? 'bg-amber-500 text-neutral-950 font-bold' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+          }`}
+        >
+          <Activity className="w-4 h-4" /> Nhật Ký & Hiệu Năng (Admin)
         </Link>
       )}
 

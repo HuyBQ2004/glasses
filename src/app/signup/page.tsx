@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { User, Lock, Mail, Phone, MapPin, ArrowRight, CheckCircle2 } from 'lucide-react';
+import CloudflareTurnstile from '@/components/CloudflareTurnstile';
+import { User, Lock, Mail, Phone, MapPin, ArrowRight, CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function SignupPage() {
@@ -18,9 +19,22 @@ export default function SignupPage() {
     phone: '',
     address: '',
   });
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Live Real-Time Password Validation Rules ("Nhập đến đâu check đến đấy")
+  const pwd = formData.password;
+  const pwdRules = [
+    { label: 'Ít nhất 8 ký tự', valid: pwd.length >= 8 },
+    { label: 'Có chữ in hoa (A-Z)', valid: /[A-Z]/.test(pwd) },
+    { label: 'Có chữ in thường (a-z)', valid: /[a-z]/.test(pwd) },
+    { label: 'Có chữ số (0-9)', valid: /[0-9]/.test(pwd) },
+    { label: 'Có ký tự đặc biệt (!@#$%...)', valid: /[^A-Za-z0-9]/.test(pwd) },
+  ];
+  const isPasswordValid = pwdRules.every((r) => r.valid);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,13 +47,19 @@ export default function SignupPage() {
     setError('');
     setSuccessMsg('');
     setActivationLink('');
+
+    if (!isPasswordValid) {
+      setError('Mật khẩu chưa đáp ứng đủ 5 yêu cầu an toàn bên dưới!');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, turnstileToken }),
       });
       const data = await res.json();
 
@@ -187,16 +207,54 @@ export default function SignupPage() {
                   </label>
                   <div className="relative">
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       name="password"
                       required
                       value={formData.password}
                       onChange={handleChange}
-                      placeholder="Mật khẩu của bạn"
-                      className="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:border-amber-500 focus:outline-none"
+                      placeholder="Nhập mật khẩu an toàn..."
+                      className="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-3 pl-11 pr-11 text-sm text-white focus:border-amber-500 focus:outline-none"
                     />
                     <Lock className="w-5 h-5 text-neutral-400 absolute left-3.5 top-3" />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-3 text-neutral-400 hover:text-amber-400 transition-colors"
+                      title={showPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'}
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
                   </div>
+
+                  {/* Real-time Password Checklist UI ("Nhập đến đâu check đến đấy") */}
+                  {formData.password.length > 0 && (
+                    <div className="mt-2.5 p-3.5 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-2 animate-in fade-in duration-200">
+                      <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+                        <span>Yêu cầu độ bảo mật mật khẩu:</span>
+                        <span className={isPasswordValid ? 'text-emerald-400' : 'text-amber-400'}>
+                          {isPasswordValid ? '✅ Đạt Yêu Cầu' : '⚠️ Chưa Đủ Độ An Toàn'}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        {pwdRules.map((rule, idx) => (
+                          <div
+                            key={idx}
+                            className={`flex items-center gap-1.5 transition-colors ${
+                              rule.valid ? 'text-emerald-400 font-bold' : 'text-neutral-500 font-normal'
+                            }`}
+                          >
+                            {rule.valid ? (
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-neutral-600 shrink-0" />
+                            )}
+                            <span>{rule.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -257,6 +315,9 @@ export default function SignupPage() {
                     className="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-3 px-4 text-sm text-white focus:border-amber-500 focus:outline-none"
                   />
                 </div>
+
+                {/* Cloudflare Anti-Bot Turnstile Widget */}
+                <CloudflareTurnstile onVerify={(token) => setTurnstileToken(token)} />
 
                 <button
                   type="submit"

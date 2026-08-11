@@ -1,13 +1,20 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { comparePassword, signToken } from '@/lib/auth';
+import { verifyTurnstileToken } from '@/lib/turnstile';
 
 export async function POST(req: Request) {
   try {
-    const { username, password } = await req.json();
+    const { username, password, turnstileToken } = await req.json();
 
     if (!username || !password) {
       return NextResponse.json({ success: false, error: 'Vui lòng nhập tài khoản và mật khẩu' }, { status: 400 });
+    }
+
+    // Verify Cloudflare Turnstile Bot Protection
+    const turnstileResult = await verifyTurnstileToken(turnstileToken);
+    if (!turnstileResult.success) {
+      return NextResponse.json({ success: false, error: turnstileResult.error }, { status: 400 });
     }
 
     const { data: user, error } = await supabase

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter as useAppRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import CloudflareTurnstile from '@/components/CloudflareTurnstile';
 import { Lock, User, ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const router = useAppRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +26,7 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, turnstileToken }),
       });
       const data = await res.json();
 
@@ -138,9 +140,14 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-neutral-300 uppercase tracking-wider mb-2">
-                Mật khẩu
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-bold text-neutral-300 uppercase tracking-wider">
+                  Mật khẩu
+                </label>
+                <Link href="/forgot-password" className="text-xs text-amber-400 font-bold hover:underline">
+                  Quên mật khẩu?
+                </Link>
+              </div>
               <div className="relative">
                 <input
                   type="password"
@@ -153,6 +160,9 @@ export default function LoginPage() {
                 <Lock className="w-5 h-5 text-neutral-400 absolute left-3.5 top-3" />
               </div>
             </div>
+
+            {/* Cloudflare Anti-Bot Turnstile Widget */}
+            <CloudflareTurnstile onVerify={(token) => setTurnstileToken(token)} />
 
             <button
               type="submit"
