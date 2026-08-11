@@ -11,13 +11,11 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const [resetUrl, setResetUrl] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
-    setResetUrl('');
     setLoading(true);
 
     try {
@@ -30,9 +28,6 @@ export default function ForgotPasswordPage() {
 
       if (data.success) {
         setSuccessMsg(data.message);
-        if (data.resetUrl) {
-          setResetUrl(data.resetUrl);
-        }
       } else {
         setError(data.error || 'Gửi yêu cầu thất bại');
       }
@@ -70,17 +65,6 @@ export default function ForgotPasswordPage() {
               <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
               <h3 className="text-lg font-bold text-white">Đã Gửi Email Khôi Phục! ✉️</h3>
               <p className="text-sm text-neutral-300 leading-relaxed">{successMsg}</p>
-
-              {resetUrl && (
-                <div className="pt-2">
-                  <a
-                    href={resetUrl}
-                    className="inline-block px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-black text-sm shadow-lg mb-2"
-                  >
-                    👉 Đặt Lại Mật Khẩu Ngay (Liên Kết Trực Tiếp)
-                  </a>
-                </div>
-              )}
 
               <div className="pt-2 border-t border-neutral-800/80 mt-2">
                 <Link

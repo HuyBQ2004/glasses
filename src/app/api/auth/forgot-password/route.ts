@@ -59,12 +59,9 @@ export async function POST(req: Request) {
       appUrl,
     });
 
-    const resetUrl = `${appUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(user.email)}`;
-
     return NextResponse.json({
       success: true,
-      message: 'Yêu cầu khôi phục mật khẩu thành công! Vui lòng kiểm tra hộp thư Email hoặc nhấp trực tiếp vào liên kết bên dưới.',
-      resetUrl,
+      message: 'Đã gửi liên kết khôi phục mật khẩu vào Email của bạn. Vui lòng kiểm tra hộp thư!',
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Lỗi hệ thống';

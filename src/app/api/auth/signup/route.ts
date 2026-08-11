@@ -79,13 +79,10 @@ export async function POST(req: Request) {
       appUrl,
     });
 
-    const activationUrl = `${appUrl}/verify-email?token=${activationToken}&username=${encodeURIComponent(user.username)}`;
-
     return NextResponse.json({
       success: true,
       requireActivation: true,
-      message: 'Đăng ký tài khoản thành công! Vui lòng kích hoạt tài khoản qua Email hoặc nhấp trực tiếp vào liên kết bên dưới.',
-      activationUrl,
+      message: 'Đăng ký tài khoản thành công! Vui lòng kiểm tra hộp thư Email để nhấp vào liên kết kích hoạt trước khi đăng nhập.',
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
