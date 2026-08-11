@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Bot, Sparkles, X, Send, RefreshCw, ShoppingBag, Eye, ShieldCheck, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface ProductCard {
   id: string | number;
@@ -28,6 +29,12 @@ const QUICK_SUGGESTIONS = [
   '💎 Gọng Titanium siêu nhẹ giá bao nhiêu?',
 ];
 
+let messageCounter = 0;
+function createMessageId(prefix: string) {
+  messageCounter += 1;
+  return `${prefix}-${messageCounter}`;
+}
+
 export default function GeminiAssistantWidget() {
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -37,16 +44,23 @@ export default function GeminiAssistantWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMounted(true);
-    setMessages([
-      {
-        id: 'welcome-1',
-        role: 'model',
-        content:
-          'Dạ em chào anh/chị! 👓 Em là **Chuyên gia AI Tư vấn Kính Mắt của GlassVault**. Em có thể tư vấn chọn gọng kính theo khuôn mặt, gợi ý kính râm, tròng kính chống ánh sáng xanh & tra cứu sản phẩm trực tiếp từ kho hàng GlassVault.\n\nAnh/chị đang cần chọn mẫu kính nào ạ?',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-    ]);
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (!isMounted) return;
+      setMounted(true);
+      setMessages([
+        {
+          id: 'welcome-1',
+          role: 'model',
+          content:
+            'Dạ em chào anh/chị! 👓 Em là **Chuyên gia AI Tư vấn Kính Mắt của GlassVault**. Em có thể tư vấn chọn gọng kính theo khuôn mặt, gợi ý kính râm, tròng kính chống ánh sáng xanh & tra cứu sản phẩm trực tiếp từ kho hàng GlassVault.\n\nAnh/chị đang cần chọn mẫu kính nào ạ?',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const scrollToBottom = () => {
@@ -61,17 +75,17 @@ export default function GeminiAssistantWidget() {
 
   if (!mounted) return null;
 
-
   const handleSend = async (textToSend?: string) => {
     const query = (textToSend || inputMessage).trim();
     if (!query || isLoading) return;
 
-    const userMsgId = Date.now().toString();
+    const userMsgId = createMessageId('msg');
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const newUserMsg: Message = {
       id: userMsgId,
       role: 'user',
       content: query,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: timeStr,
     };
 
     setMessages((prev) => [...prev, newUserMsg]);
@@ -100,7 +114,7 @@ export default function GeminiAssistantWidget() {
 
       if (data.success) {
         const botMsg: Message = {
-          id: (Date.now() + 1).toString(),
+          id: createMessageId('bot'),
           role: 'model',
           content: data.answer,
           products: data.products || [],
@@ -109,7 +123,7 @@ export default function GeminiAssistantWidget() {
         setMessages((prev) => [...prev, botMsg]);
       } else {
         const errorMsg: Message = {
-          id: (Date.now() + 1).toString(),
+          id: createMessageId('err'),
           role: 'model',
           content: `⚠️ ${data.error || 'Dạ hiện hệ thống AI đang bận. Anh/chị vui lòng thử lại sau giây lát nhé!'}`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -119,7 +133,7 @@ export default function GeminiAssistantWidget() {
     } catch (error) {
       console.error('Error fetching Gemini AI:', error);
       const errorMsg: Message = {
-        id: (Date.now() + 1).toString(),
+        id: createMessageId('err'),
         role: 'model',
         content: '⚠️ Lỗi kết nối mạng. Vui lòng kiểm tra lại đường truyền internet.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -132,7 +146,7 @@ export default function GeminiAssistantWidget() {
 
   const formatMarkdown = (text: string) => {
     // Basic Markdown formatting helper
-    let formatted = text
+    const formatted = text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/`([^`]+)`/g, '<code class="bg-slate-800 text-amber-400 px-1 py-0.5 rounded text-xs">$1</code>');
@@ -259,9 +273,12 @@ export default function GeminiAssistantWidget() {
                           className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/40 transition-all group"
                         >
                           {prod.image ? (
-                            <img
+                            <Image
                               src={prod.image}
                               alt={prod.name}
+                              width={48}
+                              height={48}
+                              unoptimized
                               className="w-12 h-12 rounded-lg object-cover bg-slate-950 border border-slate-800"
                             />
                           ) : (

@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       ('0' + date.getSeconds()).slice(-2);
 
     const currCode = 'VND';
-    let vnp_Params: Record<string, string> = {
+    const vnp_Params: Record<string, string> = {
       vnp_Version: '2.1.0',
       vnp_Command: 'pay',
       vnp_TmnCode: tmnCode,
@@ -52,7 +52,8 @@ export async function POST(req: Request) {
     vnpUrl += '?' + query + '&vnp_SecureHash=' + signed;
 
     return NextResponse.json({ success: true, paymentUrl: vnpUrl });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

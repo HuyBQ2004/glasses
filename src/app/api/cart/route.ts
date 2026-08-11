@@ -19,22 +19,26 @@ export async function GET() {
     }
 
     // Map response so product_id returns populated product object for UI compatibility
-    const formattedCart = (cartItems || []).map((item: any) => ({
-      _id: item.id,
-      id: item.id,
-      account_id: item.account_id,
-      product_id: item.product ? {
-        ...item.product,
-        _id: item.product.id
-      } : item.product_id,
-      amount: item.amount,
-      reserved_at: item.reserved_at,
-      expires_at: item.expires_at
-    }));
+    const formattedCart = (cartItems || []).map((item: Record<string, unknown>) => {
+      const productObj = item.product as Record<string, unknown> | null;
+      return {
+        _id: item.id,
+        id: item.id,
+        account_id: item.account_id,
+        product_id: productObj ? {
+          ...productObj,
+          _id: productObj.id
+        } : item.product_id,
+        amount: item.amount,
+        reserved_at: item.reserved_at,
+        expires_at: item.expires_at
+      };
+    });
 
     return NextResponse.json({ success: true, cart: formattedCart });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -86,8 +90,9 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true, cartItem });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -122,8 +127,9 @@ export async function PUT(req: Request) {
     }
 
     return NextResponse.json({ success: true, cartItem: updated });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -151,7 +157,8 @@ export async function DELETE(req: Request) {
     }
 
     return NextResponse.json({ success: true, message: 'Đã cập nhật giỏ hàng' });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

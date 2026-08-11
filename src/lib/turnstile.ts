@@ -20,7 +20,7 @@ export async function verifyTurnstileToken(token: string | null | undefined, rem
       body: formData,
     });
 
-    const outcome: any = await res.json();
+    const outcome = (await res.json()) as { success?: boolean };
     if (outcome.success) {
       return { success: true };
     }
@@ -29,8 +29,9 @@ export async function verifyTurnstileToken(token: string | null | undefined, rem
       success: false,
       error: 'Xác thực Cloudflare Turnstile thất bại hoặc hết hạn. Vui lòng thử lại!',
     };
-  } catch (err: any) {
-    console.error('[Cloudflare Turnstile Error]', err.message);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[Cloudflare Turnstile Error]', msg);
     // Graceful fallback if Cloudflare API is temporarily unreachable
     return { success: true };
   }

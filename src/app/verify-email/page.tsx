@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -9,7 +9,6 @@ import { CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const token = searchParams.get('token');
   const username = searchParams.get('username');
 
@@ -18,16 +17,21 @@ function VerifyEmailContent() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    let isMounted = true;
     if (!token) {
-      setLoading(false);
-      setSuccess(false);
-      setMessage('Không tìm thấy mã xác thực token kích hoạt.');
+      Promise.resolve().then(() => {
+        if (!isMounted) return;
+        setLoading(false);
+        setSuccess(false);
+        setMessage('Không tìm thấy mã xác thực token kích hoạt.');
+      });
       return;
     }
 
     fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}&username=${encodeURIComponent(username || '')}`)
       .then((res) => res.json())
       .then((data) => {
+        if (!isMounted) return;
         if (data.success) {
           setSuccess(true);
           setMessage(data.message || 'Tài khoản của bạn đã được kích hoạt thành công!');
@@ -38,10 +42,17 @@ function VerifyEmailContent() {
         }
       })
       .catch(() => {
+        if (!isMounted) return;
         setSuccess(false);
         setMessage('Đã xảy ra lỗi kết nối hệ thống.');
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [token, username]);
 
   return (

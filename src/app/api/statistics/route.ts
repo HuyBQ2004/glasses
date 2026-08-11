@@ -33,13 +33,17 @@ export async function GET() {
       .order('create_date', { ascending: false })
       .limit(5);
 
-    const formattedRecentOrders = (recentOrders || []).map((ord: any) => ({
-      ...ord,
-      _id: ord.id,
-      totalPrice: ord.total_price ?? ord.totalPrice,
-      account_id: ord.account ? { ...ord.account, _id: ord.account.id } : ord.account_id,
-      shipping_id: ord.shipping ? { ...ord.shipping, _id: ord.shipping.id } : ord.shipping_id,
-    }));
+    const formattedRecentOrders = (recentOrders || []).map((ord: Record<string, unknown>) => {
+      const acc = ord.account as Record<string, unknown> | null;
+      const shp = ord.shipping as Record<string, unknown> | null;
+      return {
+        ...ord,
+        _id: ord.id,
+        totalPrice: ord.total_price ?? ord.totalPrice,
+        account_id: acc ? { ...acc, _id: acc.id } : ord.account_id,
+        shipping_id: shp ? { ...shp, _id: shp.id } : ord.shipping_id,
+      };
+    });
 
     return NextResponse.json({
       success: true,
@@ -52,7 +56,8 @@ export async function GET() {
       },
       recentOrders: formattedRecentOrders,
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

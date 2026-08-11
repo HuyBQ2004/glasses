@@ -27,7 +27,7 @@ export function signToken(payload: TokenPayload): string {
 export function verifyToken(token: string): TokenPayload | null {
   try {
     return jwt.verify(token, JWT_SECRET) as TokenPayload;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -50,7 +50,7 @@ export async function getCurrentUser(): Promise<IAccount | null> {
 
     if (error || !user) return null;
     return user as IAccount;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

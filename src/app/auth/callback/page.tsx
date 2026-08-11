@@ -12,7 +12,7 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     let mounted = true;
 
-    const syncUserAndRedirect = async (user: any) => {
+    const syncUserAndRedirect = async (user: { email?: string; user_metadata?: { full_name?: string; name?: string } }) => {
       try {
         const email = user.email;
         const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0];
@@ -31,8 +31,9 @@ export default function AuthCallbackPage() {
         } else if (mounted) {
           setError(data.error || 'Không thể đồng bộ tài khoản Google');
         }
-      } catch (err: any) {
-        if (mounted) setError(err.message || 'Lỗi đồng bộ dữ liệu');
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Lỗi đồng bộ dữ liệu';
+        if (mounted) setError(msg);
       }
     };
 
@@ -74,8 +75,9 @@ export default function AuthCallbackPage() {
         return () => {
           authListener.subscription.unsubscribe();
         };
-      } catch (err: any) {
-        if (mounted) setError(err.message || 'Lỗi xác thực đăng nhập Google');
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Lỗi xác thực đăng nhập Google';
+        if (mounted) setError(msg);
       }
     };
 

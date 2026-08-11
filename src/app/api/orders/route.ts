@@ -26,16 +26,21 @@ export async function GET() {
     }
 
     // Format fields for backward compatibility with UI expecting totalPrice & _id
-    const formattedOrders = (orders || []).map((ord: any) => ({
-      ...ord,
-      _id: ord.id,
-      totalPrice: ord.total_price ?? ord.totalPrice,
-      shipping_id: ord.shipping ? { ...ord.shipping, _id: ord.shipping.id } : ord.shipping_id,
-      account_id: ord.account ? { ...ord.account, _id: ord.account.id } : ord.account_id,
-    }));
+    const formattedOrders = (orders || []).map((ord: Record<string, unknown>) => {
+      const shp = ord.shipping as Record<string, unknown> | null;
+      const acc = ord.account as Record<string, unknown> | null;
+      return {
+        ...ord,
+        _id: ord.id,
+        totalPrice: ord.total_price ?? ord.totalPrice,
+        shipping_id: shp ? { ...shp, _id: shp.id } : ord.shipping_id,
+        account_id: acc ? { ...acc, _id: acc.id } : ord.account_id,
+      };
+    });
 
     return NextResponse.json({ success: true, orders: formattedOrders });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

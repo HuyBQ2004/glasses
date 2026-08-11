@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ShieldCheck, Truck, RotateCcw, Headphones, Eye } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, Headphones } from 'lucide-react';
 
 export default function Footer() {
   return (

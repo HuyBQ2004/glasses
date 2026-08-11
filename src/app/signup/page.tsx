@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { User, Lock, Mail, Phone, MapPin, ArrowRight, CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, ArrowRight, CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function SignupPage() {
@@ -75,7 +75,7 @@ export default function SignupPage() {
       } else {
         setError(data.error || 'Đăng ký thất bại');
       }
-    } catch (err: any) {
+    } catch {
       setError('Đã xảy ra lỗi hệ thống');
     } finally {
       setLoading(false);
@@ -97,7 +97,7 @@ export default function SignupPage() {
           setError(error.message);
         }
       }
-    } catch (err: any) {
+    } catch {
       setError('Đã xảy ra lỗi khi đăng ký bằng Google');
     }
   };

@@ -16,7 +16,7 @@ export async function GET(req: Request) {
     } else {
       return NextResponse.redirect(new URL(`/orders?status=failed&orderId=${orderId}`, req.url));
     }
-  } catch (error: any) {
+  } catch {
     return NextResponse.redirect(new URL('/orders?status=error', req.url));
   }
 }

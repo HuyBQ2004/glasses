@@ -5,11 +5,31 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { ShoppingBag, Star, ArrowRight, ShieldCheck, Tag, Sparkles, RefreshCw, Eye, SlidersHorizontal } from 'lucide-react';
+import { ShoppingBag, Star, ArrowRight, Tag, Sparkles, Eye, SlidersHorizontal } from 'lucide-react';
+
+interface CategoryType {
+  id?: string;
+  _id?: string;
+  cname: string;
+}
+
+interface ProductType {
+  id?: string;
+  _id?: string;
+  name: string;
+  image: string;
+  price: number;
+  title?: string;
+  description?: string;
+  cate_id?: string;
+  cateID?: string | { id?: string; _id?: string };
+  manufacturer?: string;
+  frame_shape?: string;
+}
 
 export default function HomePage() {
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [categories, setCategories] = useState<CategoryType[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [activeBrand, setActiveBrand] = useState<string>('all');
@@ -33,7 +53,15 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    fetchData();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchData();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleAddToCart = async (productId: string) => {
@@ -59,7 +87,7 @@ export default function HomePage() {
   const shapesList = ['all', 'Mắt Phi Công (Aviator)', 'Mắt Vuông (Square)', 'Mắt Tròn (Round)', 'Mắt Mèo (Cat-Eye)', 'Gọng Chữ Nhật (Rectangle)'];
 
   const filteredProducts = products.filter(p => {
-    const catId = p.cate_id || p.cateID?.id || p.cateID?._id || p.cateID;
+    const catId = p.cate_id || (typeof p.cateID === 'object' ? (p.cateID?.id || p.cateID?._id) : p.cateID);
     const matchesCategory = activeCategory === 'all' || catId === activeCategory;
     const matchesBrand = activeBrand === 'all' || (p.manufacturer && p.manufacturer.toLowerCase().includes(activeBrand.toLowerCase()));
     const matchesShape = activeShape === 'all' || (p.frame_shape && p.frame_shape.toLowerCase().includes(activeShape.toLowerCase()));
@@ -121,9 +149,12 @@ export default function HomePage() {
             <div className="relative group mt-4 lg:mt-0">
               <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-indigo-600 rounded-3xl blur-2xl opacity-20 group-hover:opacity-40 transition duration-1000"></div>
               <div className="relative rounded-3xl overflow-hidden border border-neutral-800 bg-neutral-900 shadow-2xl">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=1000&q=80"
                   alt="Ray-Ban Aviator Hero"
+                  width={600}
+                  height={480}
+                  unoptimized
                   className="w-full h-[280px] sm:h-[400px] lg:h-[480px] object-cover object-center group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 bg-neutral-900/90 backdrop-blur-md p-3 sm:p-4 rounded-2xl border border-neutral-800 flex items-center justify-between">
@@ -141,6 +172,43 @@ export default function HomePage() {
 
         {/* BRAND & FRAME SHAPE FAST FILTERS */}
         <section className="py-6 sm:py-8 bg-neutral-900/60 border-b border-neutral-850 space-y-4">
+          
+          {/* Category Selector */}
+          {categories.length > 0 && (
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center gap-2 mb-2 text-xs font-bold uppercase tracking-wider text-amber-400">
+                <Tag className="w-4 h-4" /> Lọc Theo Danh Mục Kính:
+              </div>
+              <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+                <button
+                  onClick={() => setActiveCategory('all')}
+                  className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+                    activeCategory === 'all'
+                      ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
+                      : 'bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700'
+                  }`}
+                >
+                  ✨ Tất Cả Loại Kính
+                </button>
+                {categories.map((c, idx) => {
+                  const catId = c.id || c._id || `c-${idx}`;
+                  return (
+                    <button
+                      key={catId}
+                      onClick={() => setActiveCategory(catId)}
+                      className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+                        activeCategory === catId
+                          ? 'bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20'
+                          : 'bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700'
+                      }`}
+                    >
+                      {c.cname}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           
           {/* Brand Selector */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -217,9 +285,11 @@ export default function HomePage() {
                   >
                     {/* Product Image */}
                     <Link href={`/products/${prodId}`} className="relative block aspect-square overflow-hidden bg-neutral-800">
-                      <img
+                      <Image
                         src={product.image}
                         alt={product.name}
+                        fill
+                        unoptimized
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <span className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-neutral-950/80 backdrop-blur-sm text-amber-400 font-bold text-[9px] sm:text-[11px] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-neutral-800">

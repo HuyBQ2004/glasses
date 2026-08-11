@@ -16,7 +16,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       return NextResponse.json({ success: false, error: 'Trạng thái không hợp lệ' }, { status: 400 });
     }
 
-    const updateData: any = { status };
+    const updateData: Record<string, unknown> = { status };
     if (status === 'Delivered') {
       updateData.shipped_date = new Date().toISOString();
     }
@@ -46,7 +46,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     return NextResponse.json({ success: true, shipping: updatedShipping });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

@@ -20,10 +20,17 @@ import {
   Activity
 } from 'lucide-react';
 
+interface DashboardUser {
+  id: string;
+  username: string;
+  fullname?: string;
+  role: 'admin' | 'owner' | 'customer';
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<DashboardUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 

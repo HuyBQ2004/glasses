@@ -1,10 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users, Shield, Lock, Unlock } from 'lucide-react';
+import { Lock, Unlock } from 'lucide-react';
+
+interface AccountType {
+  id?: string;
+  _id?: string;
+  username: string;
+  fullname?: string;
+  email?: string;
+  phone?: string;
+  role: 'admin' | 'owner' | 'customer';
+  active: boolean;
+}
 
 export default function AdminStaffPage() {
-  const [accounts, setAccounts] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<AccountType[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAccounts = async () => {
@@ -21,7 +32,15 @@ export default function AdminStaffPage() {
   };
 
   useEffect(() => {
-    fetchAccounts();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchAccounts();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleUpdateRole = async (id: string, role: string, active: boolean) => {

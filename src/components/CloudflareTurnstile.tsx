@@ -3,6 +3,24 @@
 import { useEffect, useRef } from 'react';
 import { ShieldCheck } from 'lucide-react';
 
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: HTMLElement,
+        options: {
+          sitekey: string;
+          theme?: string;
+          callback?: (token: string) => void;
+          'error-callback'?: () => void;
+        }
+      ) => string;
+      remove: (widgetId: string) => void;
+    };
+    onloadTurnstileCallback?: () => void;
+  }
+}
+
 interface CloudflareTurnstileProps {
   onVerify: (token: string) => void;
   siteKey?: string;
@@ -23,9 +41,9 @@ export default function CloudflareTurnstile({ onVerify, siteKey }: CloudflareTur
     let script = document.getElementById(scriptId) as HTMLScriptElement;
 
     const renderWidget = () => {
-      if ((window as any).turnstile && containerRef.current && !widgetIdRef.current) {
+      if (window.turnstile && containerRef.current && !widgetIdRef.current) {
         try {
-          widgetIdRef.current = (window as any).turnstile.render(containerRef.current, {
+          widgetIdRef.current = window.turnstile.render(containerRef.current, {
             sitekey: effectiveSiteKey,
             theme: 'dark',
             callback: (token: string) => {
@@ -52,21 +70,21 @@ export default function CloudflareTurnstile({ onVerify, siteKey }: CloudflareTur
       script.defer = true;
       document.head.appendChild(script);
 
-      (window as any).onloadTurnstileCallback = () => {
+      window.onloadTurnstileCallback = () => {
         renderWidget();
       };
     } else {
-      if ((window as any).turnstile) {
+      if (window.turnstile) {
         renderWidget();
       }
     }
 
     return () => {
-      if (widgetIdRef.current && (window as any).turnstile) {
+      if (widgetIdRef.current && window.turnstile) {
         try {
-          (window as any).turnstile.remove(widgetIdRef.current);
+          window.turnstile.remove(widgetIdRef.current);
           widgetIdRef.current = null;
-        } catch (e) {}
+        } catch {}
       }
     };
   }, [effectiveSiteKey, onVerify]);

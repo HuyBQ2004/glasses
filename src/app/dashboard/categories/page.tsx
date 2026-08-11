@@ -1,10 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FolderTree, Plus, Trash2 } from 'lucide-react';
+import { FolderTree, Plus } from 'lucide-react';
+
+interface CategoryType {
+  id?: string;
+  _id?: string;
+  cname: string;
+  manufacturer?: string;
+}
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<CategoryType[]>([]);
   const [loading, setLoading] = useState(true);
   const [cname, setCname] = useState('');
   const [manufacturer, setManufacturer] = useState('Ray-Ban');
@@ -24,7 +31,15 @@ export default function AdminCategoriesPage() {
   };
 
   useEffect(() => {
-    fetchCategories();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchCategories();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

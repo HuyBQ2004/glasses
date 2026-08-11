@@ -12,35 +12,43 @@ export default function GlobalCloudflareSecurity() {
   const [statusText, setStatusText] = useState<string>('Đang kiểm tra an toàn kết nối...');
 
   useEffect(() => {
-    setMounted(true);
-    if (typeof window !== 'undefined') {
-      const currentHost = window.location.hostname || 'glassvault.store';
-      setDomainName(currentHost);
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (!isMounted) return;
+      setMounted(true);
+      if (typeof window !== 'undefined') {
+        const currentHost = window.location.hostname || 'glassvault.store';
+        setDomainName(currentHost);
 
-      // Nếu đã xác minh trong phiên làm việc hiện tại -> Mở khóa ngay
-      const isVerified = sessionStorage.getItem('cf_verified') === 'true';
-      if (isVerified) {
-        setVerified(true);
-        return;
-      }
-
-      // Tạo ngẫu nhiên Ray ID chuẩn Cloudflare
-      const randomRay =
-        Math.random().toString(36).substring(2, 12) +
-        Math.random().toString(36).substring(2, 8);
-      setRayId(randomRay);
-
-      // Tự động kiểm tra an toàn (Fallback cho tên miền Vercel preview chưa add domain trên Cloudflare Dashboard)
-      const autoTimer = setTimeout(() => {
-        setStatusText('Tự động xác minh kết nối an toàn!');
-        setTimeout(() => {
+        const isVerified = sessionStorage.getItem('cf_verified') === 'true';
+        if (isVerified) {
           setVerified(true);
-          sessionStorage.setItem('cf_verified', 'true');
-        }, 600);
-      }, 4000);
+          return;
+        }
 
-      return () => clearTimeout(autoTimer);
-    }
+        const randomRay =
+          Math.random().toString(36).substring(2, 12) +
+          Math.random().toString(36).substring(2, 8);
+        setRayId(randomRay);
+      }
+    });
+
+    const autoTimer = setTimeout(() => {
+      if (!isMounted) return;
+      setStatusText('Tự động xác minh kết nối an toàn!');
+      setTimeout(() => {
+        if (!isMounted) return;
+        setVerified(true);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('cf_verified', 'true');
+        }
+      }, 600);
+    }, 4000);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(autoTimer);
+    };
   }, []);
 
   const handleVerify = (token: string) => {

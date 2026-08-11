@@ -49,8 +49,9 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ success: true, products: products || [] });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
 
     const data = await req.json();
 
-    const insertData: any = {
+    const insertData: Record<string, unknown> = {
       name: data.name,
       image: data.image,
       price: data.price,
@@ -87,7 +88,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true, product: newProduct });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

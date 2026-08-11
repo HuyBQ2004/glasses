@@ -6,27 +6,60 @@ import {
   Cpu,
   Database,
   HardDrive,
-  Clock,
-  AlertTriangle,
   CheckCircle2,
-  XCircle,
   RefreshCw,
   Search,
-  Filter,
-  Terminal,
   Server,
   Eye,
-  X
+  X,
+  Terminal
 } from 'lucide-react';
 
+interface LogItem {
+  id: string;
+  timestamp: string;
+  level: string;
+  action: string;
+  statusCode: number;
+  user: string;
+  ip: string;
+  latency: string;
+  message: string;
+  stackTrace: string | null;
+}
+
+interface MetricsData {
+  metrics?: {
+    server?: {
+      cpuUsagePercent?: number;
+      memoryHeapUsedMb?: string;
+      memoryHeapTotalMb?: string;
+      memoryRssMb?: string;
+      nodeVersion?: string;
+      uptimeSeconds?: number;
+    };
+    database?: {
+      storageUsedMb?: number;
+      storageLimitMb?: number;
+      storageUsedPercent?: number;
+      latencyMs?: number;
+      status?: string;
+      totalRows?: number;
+      totalTables?: number;
+      counts?: Record<string, number>;
+    };
+  };
+  logs?: LogItem[];
+}
+
 export default function AdminSystemLogsPage() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<MetricsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const [activeTab, setActiveTab] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedLog, setSelectedLog] = useState<any>(null);
+  const [selectedLog, setSelectedLog] = useState<LogItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const fetchMetricsAndLogs = async () => {
@@ -48,7 +81,15 @@ export default function AdminSystemLogsPage() {
   };
 
   useEffect(() => {
-    fetchMetricsAndLogs();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchMetricsAndLogs();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading) {
@@ -62,7 +103,7 @@ export default function AdminSystemLogsPage() {
   const metrics = data?.metrics || {};
   const server = metrics.server || {};
   const database = metrics.database || {};
-  const logs: any[] = data?.logs || [];
+  const logs: LogItem[] = data?.logs || [];
 
   // Filter logs by tab & search query
   const filteredLogs = logs.filter((log) => {

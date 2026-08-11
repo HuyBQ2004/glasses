@@ -5,9 +5,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { User, LogOut, LayoutDashboard, Search, ShoppingBag, Package, Sun, Moon, Menu, X, Home } from 'lucide-react';
 
+interface UserType {
+  username: string;
+  fullname?: string;
+  role: string;
+}
+
 export default function Header() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [cartCount, setCartCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -15,15 +21,17 @@ export default function Header() {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   useEffect(() => {
-    const savedTheme = (localStorage.getItem('theme') as 'dark' | 'light') || 'dark';
-    setTheme(savedTheme);
-    if (savedTheme === 'light') {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('light');
-    } else {
-      document.documentElement.classList.remove('light');
-      document.documentElement.classList.add('dark');
-    }
+    Promise.resolve().then(() => {
+      const savedTheme = (localStorage.getItem('theme') as 'dark' | 'light') || 'dark';
+      setTheme(savedTheme);
+      if (savedTheme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+      }
+    });
   }, []);
 
   const toggleTheme = () => {
@@ -49,7 +57,7 @@ export default function Header() {
         const resCart = await fetch('/api/cart');
         const dataCart = await resCart.json();
         if (dataCart.success && dataCart.cart) {
-          const total = dataCart.cart.reduce((acc: number, item: any) => acc + item.amount, 0);
+          const total = dataCart.cart.reduce((acc: number, item: { amount: number }) => acc + item.amount, 0);
           setCartCount(total);
         }
       } else {
@@ -62,10 +70,20 @@ export default function Header() {
   };
 
   useEffect(() => {
-    fetchUserAndCart();
-    const handleCartUpdate = () => fetchUserAndCart();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchUserAndCart();
+      }
+    });
+    const handleCartUpdate = () => {
+      if (isMounted) fetchUserAndCart();
+    };
     window.addEventListener('cartUpdated', handleCartUpdate);
-    return () => window.removeEventListener('cartUpdated', handleCartUpdate);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+    };
   }, []);
 
   const handleLogout = async () => {

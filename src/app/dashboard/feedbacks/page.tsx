@@ -1,10 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageSquare, Star, Eye, EyeOff } from 'lucide-react';
+import { Star } from 'lucide-react';
+
+interface FeedbackType {
+  _id: string;
+  rating?: number;
+  content?: string;
+  create_date?: string;
+  createdAt?: string;
+  account_id?: {
+    username?: string;
+    fullname?: string;
+  };
+  product_id?: {
+    name?: string;
+  };
+}
 
 export default function AdminFeedbacksPage() {
-  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [feedbacks, setFeedbacks] = useState<FeedbackType[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchFeedbacks = async () => {
@@ -21,7 +36,15 @@ export default function AdminFeedbacksPage() {
   };
 
   useEffect(() => {
-    fetchFeedbacks();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchFeedbacks();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -64,11 +87,11 @@ export default function AdminFeedbacksPage() {
               </div>
 
               <p className="text-sm text-neutral-300 bg-neutral-950/60 p-4 rounded-2xl border border-neutral-850">
-                "{fb.content || 'Không có nhận xét chi tiết'}"
+                &quot;{fb.content || 'Không có nhận xét chi tiết'}&quot;
               </p>
 
               <div className="text-xs text-neutral-500">
-                Ngày gửi: {new Date(fb.create_date || fb.createdAt).toLocaleDateString('vi-VN')}
+                Ngày gửi: {new Date(fb.create_date || fb.createdAt || 0).toLocaleDateString('vi-VN')}
               </div>
             </div>
           ))}

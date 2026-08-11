@@ -70,7 +70,8 @@ export async function POST(req: Request) {
         : 'Đã tạo liên kết khôi phục mật khẩu. Vui lòng truy cập liên kết bên dưới để tạo mật khẩu mới.',
       resetUrl: hasSmtp ? null : resetUrl,
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

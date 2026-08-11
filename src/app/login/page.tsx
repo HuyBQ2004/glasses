@@ -39,7 +39,7 @@ export default function LoginPage() {
       } else {
         setError(data.error || 'Đăng nhập thất bại');
       }
-    } catch (err: any) {
+    } catch {
       setError('Đã xảy ra lỗi hệ thống');
     } finally {
       setLoading(false);
@@ -61,7 +61,7 @@ export default function LoginPage() {
           setError(error.message);
         }
       }
-    } catch (err: any) {
+    } catch {
       setError('Đã xảy ra lỗi khi đăng nhập bằng Google');
     }
   };

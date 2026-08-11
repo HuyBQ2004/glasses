@@ -1,11 +1,33 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, X, Upload, Image as ImageIcon, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Upload, Image as ImageIcon } from 'lucide-react';
+import Image from 'next/image';
+
+interface CategoryType {
+  id?: string;
+  _id?: string;
+  cname: string;
+}
+
+interface ProductType {
+  id?: string;
+  _id?: string;
+  name: string;
+  image: string;
+  price: number;
+  title?: string;
+  description?: string;
+  cate_id?: string;
+  cateID?: string | { id?: string; _id?: string };
+  quantity: number;
+  manufacturer?: string;
+  frame_shape?: string;
+}
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [categories, setCategories] = useState<CategoryType[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
@@ -43,7 +65,15 @@ export default function AdminProductsPage() {
   };
 
   useEffect(() => {
-    fetchProductsAndCategories();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchProductsAndCategories();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleOpenAddModal = () => {
@@ -62,15 +92,16 @@ export default function AdminProductsPage() {
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (product: any) => {
-    setEditingId(product.id || product._id);
+  const handleOpenEditModal = (product: ProductType) => {
+    setEditingId(product.id || product._id || null);
+    const cateIdVal = typeof product.cateID === 'object' ? (product.cateID?.id || product.cateID?._id) : (product.cate_id || product.cateID || '');
     setFormData({
       name: product.name || '',
       image: product.image || '',
       price: product.price || 0,
       title: product.title || '',
       description: product.description || '',
-      cateID: product.cate_id || product.cateID?.id || product.cateID?._id || product.cateID || '',
+      cateID: cateIdVal || '',
       quantity: product.quantity || 0,
       manufacturer: product.manufacturer || 'Ray-Ban',
       frame_shape: product.frame_shape || 'Mắt Vuông (Square)',
@@ -98,8 +129,9 @@ export default function AdminProductsPage() {
       } else {
         alert(data.error || 'Lỗi tải ảnh lên');
       }
-    } catch (err: any) {
-      alert('Lỗi tải ảnh: ' + err.message);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Lỗi tải ảnh';
+      alert('Lỗi tải ảnh: ' + msg);
     } finally {
       setUploading(false);
     }
@@ -185,7 +217,7 @@ export default function AdminProductsPage() {
               {products.map((p) => (
                 <tr key={p.id || p._id} className="hover:bg-neutral-850 transition-colors">
                   <td className="p-3 whitespace-nowrap">
-                    <img src={p.image} alt={p.name} className="w-12 h-12 object-cover rounded-xl bg-neutral-800 border border-neutral-700" />
+                    <Image src={p.image} alt={p.name} width={48} height={48} unoptimized className="w-12 h-12 object-cover rounded-xl bg-neutral-800 border border-neutral-700" />
                   </td>
                   <td className="p-3 font-bold text-white max-w-xs truncate whitespace-nowrap">{p.name}</td>
                   <td className="p-3 text-amber-400 font-semibold whitespace-nowrap">{p.manufacturer || 'Ray-Ban'}</td>
@@ -251,7 +283,7 @@ export default function AdminProductsPage() {
                   {/* Image Preview Box */}
                   <div className="w-20 h-20 rounded-2xl bg-neutral-800 border border-neutral-700 overflow-hidden flex items-center justify-center relative shrink-0">
                     {formData.image ? (
-                      <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                      <Image src={formData.image} alt="Preview" width={80} height={80} unoptimized className="w-full h-full object-cover" />
                     ) : (
                       <ImageIcon className="w-8 h-8 text-neutral-600" />
                     )}

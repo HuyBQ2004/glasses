@@ -40,7 +40,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       account_id: order.account ? { ...order.account, _id: order.account.id } : order.account_id,
     };
 
-    const formattedItems = (items || []).map((it: any) => ({
+    const formattedItems = (items || []).map((it: Record<string, unknown>) => ({
       ...it,
       _id: it.id,
       productName: it.product_name ?? it.productName,
@@ -49,7 +49,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     }));
 
     return NextResponse.json({ success: true, order: formattedOrder, items: formattedItems });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

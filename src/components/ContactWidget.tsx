@@ -9,7 +9,13 @@ export default function ContactWidget() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) setMounted(true);
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (!mounted) return null;

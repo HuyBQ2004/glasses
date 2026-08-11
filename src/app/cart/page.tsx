@@ -2,14 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { ShoppingBag, Trash2, ArrowRight, Clock, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, Clock, Trash2, ShieldCheck, ArrowRight } from 'lucide-react';
+
+interface CartItemType {
+  _id: string;
+  amount: number;
+  product_id?: {
+    _id: string;
+    name: string;
+    image: string;
+    price: number;
+    manufacturer?: string;
+  };
+}
 
 export default function CartPage() {
-  const router = useRouter();
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [cartItems, setCartItems] = useState<CartItemType[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchCart = async () => {
@@ -28,7 +39,15 @@ export default function CartPage() {
   };
 
   useEffect(() => {
-    fetchCart();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchCart();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleUpdateQuantity = async (productId: string, amount: number) => {
@@ -117,9 +136,12 @@ export default function CartPage() {
                     className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 rounded-3xl bg-neutral-900 border border-neutral-800 hover:border-neutral-750 transition-all shadow-lg"
                   >
                     <div className="flex items-center gap-4">
-                      <img
+                      <Image
                         src={prod.image}
                         alt={prod.name}
+                        width={96}
+                        height={96}
+                        unoptimized
                         className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-2xl bg-neutral-800 border border-neutral-750 shrink-0"
                       />
 

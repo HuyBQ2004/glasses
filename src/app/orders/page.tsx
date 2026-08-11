@@ -5,13 +5,45 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Package, Truck, CheckCircle, Clock, AlertCircle, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Package, CheckCircle, ShoppingBag, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+
+interface OrderItem {
+  product_name?: string;
+  product_image?: string;
+  product_price?: number;
+  quantity?: number;
+}
+
+interface OrderType {
+  id?: string;
+  _id?: string;
+  total_price?: number;
+  totalPrice?: number;
+  payment_status?: string;
+  payment_method?: string;
+  created_at?: string;
+  create_date?: string;
+  status?: string;
+  shipping_id?: {
+    status?: string;
+    name?: string;
+    phone?: string;
+    address?: string;
+  };
+  account?: {
+    fullname?: string;
+    phone?: string;
+    address?: string;
+  };
+  items?: OrderItem[];
+}
 
 function OrdersContent() {
   const searchParams = useSearchParams();
   const statusMsg = searchParams.get('status');
 
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<OrderType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +54,7 @@ function OrdersContent() {
           setOrders(data.orders || []);
         }
       })
-      .catch((err) => console.error(err))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -103,7 +135,7 @@ function OrdersContent() {
                     </span>
                     <p className="text-[11px] sm:text-xs text-neutral-400 mt-0.5">
                       Ngày đặt:{' '}
-                      {new Date(order.created_at || order.create_date || Date.now()).toLocaleString('vi-VN')}
+                      {new Date(order.created_at || order.create_date || 0).toLocaleString('vi-VN')}
                     </p>
                   </div>
 
@@ -128,12 +160,15 @@ function OrdersContent() {
                   <div className="space-y-3">
                     <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Danh Sách Kính Đã Đặt</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {order.items.map((item: any, i: number) => (
+                      {order.items.map((item, i) => (
                         <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-neutral-950 border border-neutral-850">
                           {item.product_image && (
-                            <img
+                            <Image
                               src={item.product_image}
-                              alt={item.product_name}
+                              alt={item.product_name || 'Product'}
+                              width={48}
+                              height={48}
+                              unoptimized
                               className="w-12 h-12 object-cover rounded-xl bg-neutral-800 shrink-0"
                             />
                           )}
@@ -142,7 +177,7 @@ function OrdersContent() {
                             <p className="text-xs text-neutral-400">Số lượng: {item.quantity}</p>
                           </div>
                           <span className="font-black text-amber-400 text-xs sm:text-sm shrink-0">
-                            {Number(item.product_price * item.quantity).toLocaleString('vi-VN')}đ
+                            {Number((item.product_price || 0) * (item.quantity || 1)).toLocaleString('vi-VN')}đ
                           </span>
                         </div>
                       ))}

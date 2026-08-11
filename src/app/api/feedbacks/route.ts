@@ -22,16 +22,21 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
-    const formattedFeedbacks = (feedbacks || []).map((fb: any) => ({
-      ...fb,
-      _id: fb.id,
-      account_id: fb.account ? { ...fb.account, _id: fb.account.id } : fb.account_id,
-      product_id: fb.product ? { ...fb.product, _id: fb.product.id } : fb.product_id,
-    }));
+    const formattedFeedbacks = (feedbacks || []).map((fb: Record<string, unknown>) => {
+      const acc = fb.account as Record<string, unknown> | null;
+      const prod = fb.product as Record<string, unknown> | null;
+      return {
+        ...fb,
+        _id: fb.id,
+        account_id: acc ? { ...acc, _id: acc.id } : fb.account_id,
+        product_id: prod ? { ...prod, _id: prod.id } : fb.product_id,
+      };
+    });
 
     return NextResponse.json({ success: true, feedbacks: formattedFeedbacks });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -67,7 +72,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true, feedback: { ...feedback, _id: feedback.id } });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

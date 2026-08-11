@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
@@ -68,7 +68,7 @@ function ResetPasswordContent() {
       } else {
         setError(data.error || 'Đặt lại mật khẩu thất bại');
       }
-    } catch (err: any) {
+    } catch {
       setError('Đã xảy ra lỗi hệ thống khi kết nối');
     } finally {
       setLoading(false);

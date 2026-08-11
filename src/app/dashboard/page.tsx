@@ -1,24 +1,52 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { ShoppingBag, DollarSign, Package, Users, MessageSquare, ArrowUpRight } from 'lucide-react';
+import { ShoppingBag, DollarSign, Package, Users } from 'lucide-react';
+
+interface StatsType {
+  totalRevenue?: number;
+  totalOrders?: number;
+  totalProducts?: number;
+  totalUsers?: number;
+}
+
+interface RecentOrderType {
+  _id: string;
+  totalPrice: number;
+  payment_method: string;
+  payment_status?: string;
+  account_id?: {
+    fullname?: string;
+    username?: string;
+  };
+  shipping_id?: {
+    status?: string;
+  };
+}
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<any>(null);
-  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [stats, setStats] = useState<StatsType | null>(null);
+  const [recentOrders, setRecentOrders] = useState<RecentOrderType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/statistics')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setStats(data.stats);
-          setRecentOrders(data.recentOrders || []);
-        }
-      })
-      .finally(() => setLoading(false));
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      fetch('/api/statistics')
+        .then(res => res.json())
+        .then(data => {
+          if (isMounted && data.success) {
+            setStats(data.stats);
+            setRecentOrders(data.recentOrders || []);
+          }
+        })
+        .finally(() => {
+          if (isMounted) setLoading(false);
+        });
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading) {

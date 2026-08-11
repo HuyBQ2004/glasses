@@ -1,13 +1,49 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShoppingBag, Search, Eye, Filter, CheckCircle2, Truck, Clock, XCircle, DollarSign, Calendar } from 'lucide-react';
+import { Eye, XCircle } from 'lucide-react';
+import Image from 'next/image';
+
+interface OrderItem {
+  product_name?: string;
+  product_image?: string;
+  product_price?: number;
+  quantity?: number;
+}
+
+interface OrderType {
+  id?: string;
+  _id?: string;
+  total_price?: number;
+  totalPrice?: number;
+  payment_status?: string;
+  payment_method?: string;
+  created_at?: string;
+  create_date?: string;
+  status?: string;
+  note?: string;
+  shipping_id?: {
+    id?: string;
+    _id?: string;
+    status?: string;
+    name?: string;
+    phone?: string;
+    address?: string;
+  };
+  account?: {
+    fullname?: string;
+    username?: string;
+    phone?: string;
+    address?: string;
+  };
+  items?: OrderItem[];
+}
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<OrderType[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchOrders = async () => {
@@ -26,7 +62,15 @@ export default function AdminOrdersPage() {
   };
 
   useEffect(() => {
-    fetchOrders();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchOrders();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleUpdateShippingStatus = async (shippingId: string, status: string) => {
@@ -41,10 +85,10 @@ export default function AdminOrdersPage() {
         alert(`Đã cập nhật trạng thái đơn hàng thành: ${status}`);
         fetchOrders();
         if (selectedOrder && (selectedOrder.shipping_id?.id === shippingId || selectedOrder.shipping_id?._id === shippingId)) {
-          setSelectedOrder((prev: any) => ({
+          setSelectedOrder((prev) => (prev ? {
             ...prev,
             shipping_id: { ...prev.shipping_id, status },
-          }));
+          } : null));
         }
       } else {
         alert(data.error || 'Lỗi cập nhật trạng thái');
@@ -130,8 +174,8 @@ export default function AdminOrdersPage() {
             </thead>
             <tbody className="divide-y divide-neutral-800">
               {filteredOrders.map((ord) => {
-                const ordId = ord.id || ord._id;
-                const shippingId = ord.shipping_id?.id || ord.shipping_id?._id || ord.shipping_id;
+                const ordId = ord.id || ord._id || '';
+                const shippingId = ord.shipping_id?.id || ord.shipping_id?._id || '';
                 const status = ord.shipping_id?.status || 'Pending';
                 const paymentStatus = ord.payment_status || 'Pending';
 
@@ -205,7 +249,7 @@ export default function AdminOrdersPage() {
                   Chi Tiết Đơn Hàng #{selectedOrder.id?.slice(-6).toUpperCase() || selectedOrder._id?.slice(-6).toUpperCase()}
                 </h3>
                 <span className="text-xs text-neutral-400">
-                  Ngày đặt: {new Date(selectedOrder.created_at || selectedOrder.create_date || Date.now()).toLocaleString('vi-VN')}
+                  Ngày đặt: {new Date(selectedOrder.created_at || selectedOrder.create_date || 0).toLocaleString('vi-VN')}
                 </span>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="text-neutral-400 hover:text-white">
@@ -226,11 +270,11 @@ export default function AdminOrdersPage() {
             <div className="space-y-3">
               <p className="text-amber-400 font-bold text-xs uppercase">Sản Phẩm Trong Đơn</p>
               {selectedOrder.items && selectedOrder.items.length > 0 ? (
-                selectedOrder.items.map((item: any, idx: number) => (
+                selectedOrder.items.map((item, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-neutral-950 border border-neutral-800">
                     <div className="flex items-center gap-3">
                       {item.product_image && (
-                        <img src={item.product_image} alt={item.product_name} className="w-10 h-10 object-cover rounded-lg bg-neutral-800" />
+                        <Image src={item.product_image} alt={item.product_name || 'Product'} width={40} height={40} unoptimized className="w-10 h-10 object-cover rounded-lg bg-neutral-800" />
                       )}
                       <div>
                         <p className="font-bold text-white text-sm">{item.product_name}</p>
@@ -238,7 +282,7 @@ export default function AdminOrdersPage() {
                       </div>
                     </div>
                     <span className="font-black text-amber-400 text-sm">
-                      {Number(item.product_price * item.quantity).toLocaleString('vi-VN')}đ
+                      {Number((item.product_price || 0) * (item.quantity || 1)).toLocaleString('vi-VN')}đ
                     </span>
                   </div>
                 ))

@@ -5,7 +5,6 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const orderId = searchParams.get('orderId');
-    const status = searchParams.get('status') || searchParams.get('code');
 
     if (orderId) {
       // Update order status to Paid upon successful PayOS payment
@@ -18,7 +17,7 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.redirect(new URL('/orders?status=success', req.url));
-  } catch (error: any) {
+  } catch {
     return NextResponse.redirect(new URL('/orders?status=error', req.url));
   }
 }

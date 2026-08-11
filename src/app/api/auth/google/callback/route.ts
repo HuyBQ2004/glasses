@@ -55,7 +55,7 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.redirect(new URL('/login?error=google_failed', req.url));
-  } catch (err: any) {
+  } catch {
     return NextResponse.redirect(new URL('/login?error=google_error', req.url));
   }
 }

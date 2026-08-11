@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
       } else {
         setError(data.error || 'Gửi yêu cầu thất bại');
       }
-    } catch (err: any) {
+    } catch {
       setError('Đã xảy ra lỗi hệ thống khi kết nối');
     } finally {
       setLoading(false);

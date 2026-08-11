@@ -56,7 +56,8 @@ export async function GET() {
       success: true,
       message: 'Đã dọn dẹp sạch toàn bộ dữ liệu mẫu. Chỉ giữ lại duy nhất 1 tài khoản admin (admin / 123456)!',
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

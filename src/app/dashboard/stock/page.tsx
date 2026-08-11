@@ -1,11 +1,33 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Warehouse, Plus, History } from 'lucide-react';
+import { Plus, History } from 'lucide-react';
+
+interface ProductStockType {
+  id?: string;
+  _id?: string;
+  name: string;
+  quantity: number;
+}
+
+interface StockImportType {
+  id?: string;
+  _id?: string;
+  import_quantity: number;
+  note?: string;
+  created_at?: string;
+  createdAt?: string;
+  product_id?: {
+    name?: string;
+  };
+  created_by?: {
+    fullname?: string;
+  };
+}
 
 export default function StockImportPage() {
-  const [products, setProducts] = useState<any[]>([]);
-  const [imports, setImports] = useState<any[]>([]);
+  const [products, setProducts] = useState<ProductStockType[]>([]);
+  const [imports, setImports] = useState<StockImportType[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [productId, setProductId] = useState('');
@@ -25,7 +47,7 @@ export default function StockImportPage() {
 
       if (dataP.success) {
         setProducts(dataP.products || []);
-        if (dataP.products?.length > 0) setProductId(dataP.products[0]._id);
+        if (dataP.products?.length > 0) setProductId(dataP.products[0]._id || dataP.products[0].id || '');
       }
       if (dataI.success) setImports(dataI.imports || []);
     } catch (error) {
@@ -36,7 +58,15 @@ export default function StockImportPage() {
   };
 
   useEffect(() => {
-    fetchData();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchData();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleImportSubmit = async (e: React.FormEvent) => {
@@ -157,7 +187,7 @@ export default function StockImportPage() {
                       <td className="p-3 font-black text-amber-400 whitespace-nowrap">+{imp.import_quantity} chiếc</td>
                       <td className="p-3 text-neutral-300 whitespace-nowrap">{imp.created_by?.fullname || 'Thủ Kho'}</td>
                       <td className="p-3 text-neutral-400 text-xs whitespace-nowrap">
-                        {new Date(imp.created_at || imp.createdAt || Date.now()).toLocaleDateString('vi-VN')}
+                        {new Date(imp.created_at || imp.createdAt || 0).toLocaleDateString('vi-VN')}
                       </td>
                       <td className="p-3 text-neutral-400 text-xs italic whitespace-nowrap">{imp.note || '---'}</td>
                     </tr>

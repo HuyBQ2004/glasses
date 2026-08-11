@@ -24,8 +24,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       .order('created_at', { ascending: false });
 
     return NextResponse.json({ success: true, product, feedbacks: feedbacks || [] });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -39,7 +40,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const { id } = await params;
     const body = await req.json();
 
-    const updatePayload: any = { ...body };
+    const updatePayload: Record<string, unknown> = { ...body };
     if (updatePayload.cateID) {
       updatePayload.cate_id = updatePayload.cateID;
       delete updatePayload.cateID;
@@ -57,8 +58,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     return NextResponse.json({ success: true, product: updated });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -81,7 +83,8 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     }
 
     return NextResponse.json({ success: true, message: 'Đã xóa sản phẩm' });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

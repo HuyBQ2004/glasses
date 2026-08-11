@@ -52,8 +52,9 @@ export async function sendActivationEmail({ to, username, token, appUrl }: SendA
 
       console.log(`[Email] Activation email successfully sent to ${to}`);
       return true;
-    } catch (err: any) {
-      console.error('[Email Error] Failed to send activation email via SMTP:', err.message);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[Email Error] Failed to send activation email via SMTP:', msg);
     }
   }
 
@@ -117,8 +118,9 @@ export async function sendResetPasswordEmail({ to, username, token, appUrl }: Se
 
       console.log(`[Email] Password reset email successfully sent to ${to}`);
       return true;
-    } catch (err: any) {
-      console.error('[Email Error] Failed to send reset email via SMTP:', err.message);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[Email Error] Failed to send reset email via SMTP:', msg);
     }
   }
 

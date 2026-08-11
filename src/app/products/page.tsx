@@ -1,14 +1,34 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Search, ShoppingBag, Star, Filter, ArrowUpDown, Eye, SlidersHorizontal } from 'lucide-react';
 
+import Image from 'next/image';
+
+interface CategoryItem {
+  id?: string;
+  _id?: string;
+  cname: string;
+}
+
+interface ProductItem {
+  id?: string;
+  _id?: string;
+  name: string;
+  image: string;
+  price: number;
+  title?: string;
+  description?: string;
+  manufacturer?: string;
+  frame_shape?: string;
+}
+
 export default function ProductsPage() {
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [products, setProducts] = useState<ProductItem[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -16,7 +36,7 @@ export default function ProductsPage() {
   const [selectedShape, setSelectedShape] = useState('');
   const [sort, setSort] = useState('newest');
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -27,12 +47,12 @@ export default function ProductsPage() {
       const res = await fetch(`/api/products?${params.toString()}`);
       const data = await res.json();
       if (data.success) {
-        let prods = data.products || [];
+        let prods: ProductItem[] = data.products || [];
         if (selectedBrand) {
-          prods = prods.filter((p: any) => p.manufacturer && p.manufacturer.toLowerCase().includes(selectedBrand.toLowerCase()));
+          prods = prods.filter((p) => p.manufacturer && p.manufacturer.toLowerCase().includes(selectedBrand.toLowerCase()));
         }
         if (selectedShape) {
-          prods = prods.filter((p: any) => p.frame_shape && p.frame_shape.toLowerCase().includes(selectedShape.toLowerCase()));
+          prods = prods.filter((p) => p.frame_shape && p.frame_shape.toLowerCase().includes(selectedShape.toLowerCase()));
         }
         setProducts(prods);
       }
@@ -41,17 +61,31 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, selectedCategory, sort, selectedBrand, selectedShape]);
 
   useEffect(() => {
-    fetch('/api/categories')
-      .then(res => res.json())
-      .then(data => { if (data.success) setCategories(data.categories || []); });
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      fetch('/api/categories')
+        .then(res => res.json())
+        .then(data => { if (isMounted && data.success) setCategories(data.categories || []); });
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-  }, [selectedCategory, selectedBrand, selectedShape, sort]);
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchProducts();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchProducts]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,9 +235,11 @@ export default function ProductsPage() {
                   className="group bg-neutral-900/90 border border-neutral-800 hover:border-amber-500/40 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10 flex flex-col"
                 >
                   <Link href={`/products/${prodId}`} className="relative block aspect-square overflow-hidden bg-neutral-800">
-                    <img
+                    <Image
                       src={product.image}
                       alt={product.name}
+                      fill
+                      unoptimized
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <span className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-neutral-950/80 backdrop-blur-sm text-amber-400 font-bold text-[9px] sm:text-[11px] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-neutral-800">

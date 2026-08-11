@@ -26,22 +26,22 @@ export async function POST(req: Request) {
     }
 
     let subtotal = 0;
-    const orderItems: Array<{ product: any; amount: number; price: number }> = [];
+    const orderItems: Array<{ product: Record<string, unknown>; amount: number; price: number }> = [];
 
     for (const item of cartItems) {
-      const prod = item.product;
-      if (prod && prod.quantity >= item.amount) {
-        subtotal += prod.price * item.amount;
+      const prod = item.product as Record<string, unknown> | null;
+      if (prod && (prod.quantity as number) >= item.amount) {
+        subtotal += (prod.price as number) * item.amount;
         orderItems.push({
           product: prod,
           amount: item.amount,
-          price: prod.price,
+          price: prod.price as number,
         });
       } else {
-        return NextResponse.json({
-          success: false,
-          error: `Sản phẩm "${prod?.name || 'Giày'}" không đủ số lượng trong kho.`,
-        }, { status: 400 });
+        return NextResponse.json(
+          { success: false, error: `Sản phẩm ${prod?.pname || 'trên'} không đủ số lượng tồn kho` },
+          { status: 400 }
+        );
       }
     }
 
@@ -166,7 +166,8 @@ export async function POST(req: Request) {
       paymentMethod,
       message: 'Đặt hàng thành công!',
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

@@ -55,14 +55,15 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
-    const formattedVouchers = (vouchers || []).map((v: any) => ({
+    const formattedVouchers = (vouchers || []).map((v: Record<string, unknown>) => ({
       ...v,
       _id: v.id,
     }));
 
     return NextResponse.json({ success: true, vouchers: formattedVouchers });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -96,7 +97,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true, voucher: { ...voucher, _id: voucher.id } });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

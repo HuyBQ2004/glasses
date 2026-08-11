@@ -1,10 +1,34 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Truck, CheckCircle2, XCircle, Clock, ShieldCheck, DollarSign, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
+
+interface ShippingOrderType {
+  id?: string;
+  _id?: string;
+  total_price?: number;
+  totalPrice?: number;
+  payment_method?: string;
+  payment_status?: string;
+  status?: string;
+  shipping_id?: {
+    id?: string;
+    _id?: string;
+    status?: string;
+    name?: string;
+    phone?: string;
+    address?: string;
+  };
+  account?: {
+    fullname?: string;
+    username?: string;
+    phone?: string;
+    address?: string;
+  };
+}
 
 export default function ShippingManagerPage() {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<ShippingOrderType[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -25,7 +49,15 @@ export default function ShippingManagerPage() {
   };
 
   useEffect(() => {
-    fetchOrders();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchOrders();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleUpdateStatus = async (shippingId: string, status: string) => {

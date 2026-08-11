@@ -44,8 +44,9 @@ export async function POST(req: Request) {
         paymentUrl: paymentLinkData.checkoutUrl,
         qrCode: paymentLinkData.qrCode,
       });
-    } catch (payosError: any) {
-      console.warn('PayOS API error, using sandbox gateway fallback:', payosError.message);
+    } catch (payosError: unknown) {
+      const msg = payosError instanceof Error ? payosError.message : String(payosError);
+      console.warn('PayOS API error, using sandbox gateway fallback:', msg);
       // Fallback redirect URL for testing sandbox environment
       const fallbackUrl = `${appUrl}/api/payos/return?orderId=${orderId}&orderCode=${orderCode}&status=PAID`;
       return NextResponse.json({
@@ -53,7 +54,8 @@ export async function POST(req: Request) {
         paymentUrl: fallbackUrl,
       });
     }
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

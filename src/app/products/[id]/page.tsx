@@ -1,22 +1,51 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, useCallback, use } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { ShoppingBag, Star, ShieldCheck, Truck, RotateCcw, ArrowLeft, Send, Eye, Sparkles } from 'lucide-react';
+import { ShoppingBag, Star, ArrowLeft, Send, Eye, Sparkles } from 'lucide-react';
+import Image from 'next/image';
+
+interface FeedbackType {
+  id?: string;
+  _id?: string;
+  rating: number;
+  content: string;
+  create_date: string;
+  account_id?: {
+    fullname?: string;
+    username?: string;
+  };
+}
+
+interface ProductDetailType {
+  id?: string;
+  _id?: string;
+  name: string;
+  image: string;
+  price: number;
+  title?: string;
+  description?: string;
+  quantity: number;
+  manufacturer?: string;
+  frame_shape?: string;
+  cateID?: {
+    cname?: string;
+  };
+}
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [product, setProduct] = useState<any>(null);
-  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [product, setProduct] = useState<ProductDetailType | null>(null);
+  const [feedbacks, setFeedbacks] = useState<FeedbackType[]>([]);
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState(1);
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState('');
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
 
-  const fetchDetail = async () => {
+  const fetchDetail = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/products/${id}`);
@@ -30,11 +59,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
-    fetchDetail();
-  }, [id]);
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchDetail();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchDetail]);
 
   const handleAddToCart = async () => {
     try {
@@ -121,9 +158,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           
           {/* Main Product Image */}
           <div className="rounded-2xl overflow-hidden bg-neutral-800 aspect-square relative border border-neutral-750">
-            <img
+            <Image
               src={product.image}
               alt={product.name}
+              fill
+              unoptimized
               className="w-full h-full object-cover"
             />
             <span className="absolute top-4 left-4 bg-neutral-950/90 text-amber-400 font-bold text-xs px-3.5 py-1.5 rounded-full border border-neutral-800">

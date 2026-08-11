@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     const uploadDir = path.join(process.cwd(), 'public', 'uploads');
     try {
       await mkdir(uploadDir, { recursive: true });
-    } catch (e) {
+    } catch {
       // Folder exists
     }
 
@@ -35,7 +35,8 @@ export async function POST(req: Request) {
       url: imageUrl,
       message: 'Tải ảnh lên thành công!',
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

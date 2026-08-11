@@ -3,8 +3,18 @@
 import { useState, useEffect } from 'react';
 import { Tag, Plus } from 'lucide-react';
 
+interface VoucherType {
+  id?: string;
+  _id?: string;
+  code: string;
+  discount_percent: number;
+  max_discount?: number;
+  min_order_value?: number;
+  expiry_date: string;
+}
+
 export default function AdminVouchersPage() {
-  const [vouchers, setVouchers] = useState<any[]>([]);
+  const [vouchers, setVouchers] = useState<VoucherType[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [code, setCode] = useState('');
@@ -28,7 +38,15 @@ export default function AdminVouchersPage() {
   };
 
   useEffect(() => {
-    fetchVouchers();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchVouchers();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

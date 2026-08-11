@@ -91,7 +91,8 @@ export async function POST(req: Request) {
         : 'Đăng ký thành công! Vui lòng kích hoạt tài khoản bằng liên kết bên dưới.',
       activationUrl: hasSmtp ? null : activationUrl,
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

@@ -18,16 +18,21 @@ export async function GET() {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
-    const formattedImports = (imports || []).map((imp: any) => ({
-      ...imp,
-      _id: imp.id,
-      product_id: imp.product ? { ...imp.product, _id: imp.product.id } : imp.product_id,
-      created_by: imp.creator ? { ...imp.creator, _id: imp.creator.id } : imp.created_by,
-    }));
+    const formattedImports = (imports || []).map((imp: Record<string, unknown>) => {
+      const prod = imp.product as Record<string, unknown> | null;
+      const creator = imp.creator as Record<string, unknown> | null;
+      return {
+        ...imp,
+        _id: imp.id,
+        product_id: prod ? { ...prod, _id: prod.id } : imp.product_id,
+        created_by: creator ? { ...creator, _id: creator.id } : imp.created_by,
+      };
+    });
 
     return NextResponse.json({ success: true, imports: formattedImports });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -73,7 +78,8 @@ export async function POST(req: Request) {
       .eq('id', productId);
 
     return NextResponse.json({ success: true, stockImport, message: 'Nhập kho thành công!' });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Lỗi hệ thống';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

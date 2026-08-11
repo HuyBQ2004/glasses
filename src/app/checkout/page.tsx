@@ -1,18 +1,37 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { CreditCard, Truck, CheckCircle2, ShieldCheck, Tag, Check, X, QrCode } from 'lucide-react';
+import { CreditCard, Truck, Tag, Check, X, QrCode } from 'lucide-react';
+
+interface CartItem {
+  id?: string;
+  _id?: string;
+  amount: number;
+  product_id?: {
+    price?: number;
+    name?: string;
+  };
+}
+
+interface Voucher {
+  id?: string;
+  _id?: string;
+  code: string;
+  discount_percent: number;
+  max_discount?: number;
+  min_order_value?: number;
+}
 
 function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const voucherQuery = searchParams.get('voucher') || '';
 
-  const [cartItems, setCartItems] = useState<any[]>([]);
-  const [availableVouchers, setAvailableVouchers] = useState<any[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [availableVouchers, setAvailableVouchers] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -21,12 +40,49 @@ function CheckoutContent() {
   const [address, setAddress] = useState('');
   const [note, setNote] = useState('');
   const [voucherCode, setVoucherCode] = useState(voucherQuery);
-  const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
+  const [appliedVoucher, setAppliedVoucher] = useState<Voucher | null>(null);
   const [voucherError, setVoucherError] = useState('');
   const [voucherSuccess, setVoucherSuccess] = useState('');
 
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'PayOS'>('COD');
   const [error, setError] = useState('');
+
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.product_id?.price || 0) * item.amount, 0);
+
+  const handleApplyVoucher = useCallback(async (codeToApply?: string) => {
+    const code = (codeToApply || voucherCode).trim().toUpperCase();
+    setVoucherError('');
+    setVoucherSuccess('');
+
+    if (!code) {
+      setAppliedVoucher(null);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/vouchers?code=${encodeURIComponent(code)}`);
+      const data = await res.json();
+
+      if (!data.success || !data.voucher) {
+        setVoucherError(data.error || 'Mã giảm giá không hợp lệ');
+        setAppliedVoucher(null);
+        return;
+      }
+
+      const v = data.voucher;
+      if (subtotal < (v.min_order_value || 0)) {
+        setVoucherError(`Đơn hàng phải từ ${Number(v.min_order_value).toLocaleString('vi-VN')}đ để dùng mã ${v.code}`);
+        setAppliedVoucher(null);
+        return;
+      }
+
+      setAppliedVoucher(v);
+      setVoucherSuccess(`Đã áp dụng mã giảm giá ${v.code} (-${v.discount_percent}%)!`);
+    } catch {
+      setVoucherError('Lỗi kiểm tra mã giảm giá');
+      setAppliedVoucher(null);
+    }
+  }, [voucherCode, subtotal]);
 
   useEffect(() => {
     // fetch currentUser to prefill form
@@ -60,50 +116,18 @@ function CheckoutContent() {
       });
   }, []);
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.product_id?.price || 0) * item.amount, 0);
-
-  const handleApplyVoucher = async (codeToApply?: string) => {
-    const code = (codeToApply || voucherCode).trim().toUpperCase();
-    setVoucherError('');
-    setVoucherSuccess('');
-
-    if (!code) {
-      setAppliedVoucher(null);
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/vouchers?code=${encodeURIComponent(code)}`);
-      const data = await res.json();
-
-      if (!data.success || !data.voucher) {
-        setVoucherError(data.error || 'Mã giảm giá không hợp lệ');
-        setAppliedVoucher(null);
-        return;
-      }
-
-      const v = data.voucher;
-      if (subtotal < (v.min_order_value || 0)) {
-        setVoucherError(`Đơn hàng phải từ ${Number(v.min_order_value).toLocaleString('vi-VN')}đ để dùng mã ${v.code}`);
-        setAppliedVoucher(null);
-        return;
-      }
-
-      setAppliedVoucher(v);
-      setVoucherSuccess(`Đã áp dụng mã giảm giá ${v.code} (-${v.discount_percent}%)!`);
-    } catch (err) {
-      setVoucherError('Lỗi kiểm tra mã giảm giá');
-      setAppliedVoucher(null);
-    }
-  };
-
   // Auto apply voucher if passed via query or select
   useEffect(() => {
+    let isMounted = true;
     if (voucherCode && subtotal > 0) {
-      handleApplyVoucher(voucherCode);
+      Promise.resolve().then(() => {
+        if (isMounted) handleApplyVoucher(voucherCode);
+      });
     }
-  }, [voucherCode, subtotal]);
-
+    return () => {
+      isMounted = false;
+    };
+  }, [voucherCode, subtotal, handleApplyVoucher]);
 
   const handleRemoveVoucher = () => {
     setVoucherCode('');
@@ -174,7 +198,7 @@ function CheckoutContent() {
 
       // If COD, go to orders page directly
       router.push('/orders?status=success');
-    } catch (err: any) {
+    } catch {
       setError('Đã xảy ra lỗi hệ thống');
     } finally {
       setSubmitting(false);
