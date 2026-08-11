@@ -1,13 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 import { MessageCircle, Phone, X } from 'lucide-react';
 
 export default function ContactWidget() {
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
-    <div className="fixed bottom-20 right-5 z-50 flex flex-col items-end gap-2.5">
+    <div className="fixed bottom-20 right-5 z-[9999] flex flex-col items-end gap-2.5">
+
 
       {/* Expanded Quick Contact Buttons */}
       {isOpen && (
