@@ -51,9 +51,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: updateError.message }, { status: 500 });
     }
 
-    const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
-
-    // Send Reset Email
+    // Send Reset Email (ignoring any SMTP failures)
     await sendResetPasswordEmail({
       to: user.email,
       username: user.fullname || user.username,
@@ -65,10 +63,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: hasSmtp
-        ? 'Đã gửi liên kết khôi phục mật khẩu vào Email của bạn. Vui lòng kiểm tra hộp thư!'
-        : 'Đã tạo liên kết khôi phục mật khẩu. Vui lòng truy cập liên kết bên dưới để tạo mật khẩu mới.',
-      resetUrl: hasSmtp ? null : resetUrl,
+      message: 'Yêu cầu khôi phục mật khẩu thành công! Vui lòng kiểm tra hộp thư Email hoặc nhấp trực tiếp vào liên kết bên dưới.',
+      resetUrl,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Lỗi hệ thống';

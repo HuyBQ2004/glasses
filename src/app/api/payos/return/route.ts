@@ -5,6 +5,12 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const orderId = searchParams.get('orderId');
+    const status = searchParams.get('status');
+    const cancel = searchParams.get('cancel');
+
+    if (cancel === 'true' || status === 'CANCELLED') {
+      return NextResponse.redirect(new URL(`/orders?status=cancelled${orderId ? `&orderId=${orderId}` : ''}`, req.url));
+    }
 
     if (orderId) {
       // Update order status to Paid upon successful PayOS payment

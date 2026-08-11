@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       amount: Math.round(amount),
       description,
       returnUrl: `${appUrl}/api/payos/return?orderId=${orderId}&orderCode=${orderCode}`,
-      cancelUrl: `${appUrl}/checkout?cancel=true`,
+      cancelUrl: `${appUrl}/orders?status=cancelled&orderId=${orderId}`,
     };
 
     try {

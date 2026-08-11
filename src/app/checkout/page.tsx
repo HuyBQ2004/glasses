@@ -191,7 +191,7 @@ function CheckoutContent() {
         });
         const payosData = await payosRes.json();
         if (payosData.success && payosData.paymentUrl) {
-          window.location.href = payosData.paymentUrl;
+          window.location.assign(payosData.paymentUrl);
           return;
         }
       }

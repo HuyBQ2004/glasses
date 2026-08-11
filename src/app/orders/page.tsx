@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Package, CheckCircle, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Package, CheckCircle, ShoppingBag, ArrowRight, CreditCard, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 
 interface OrderItem {
@@ -42,9 +42,11 @@ interface OrderType {
 function OrdersContent() {
   const searchParams = useSearchParams();
   const statusMsg = searchParams.get('status');
+  const cancelledOrderId = searchParams.get('orderId');
 
   const [orders, setOrders] = useState<OrderType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/orders')
@@ -58,15 +60,48 @@ function OrdersContent() {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleRePayPayOS = async (orderId: string, amount: number) => {
+    setPayingOrderId(orderId);
+    try {
+      const res = await fetch('/api/payos/create-payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, amount }),
+      });
+      const data = await res.json();
+      if (data.success && data.paymentUrl) {
+        window.location.assign(data.paymentUrl);
+      } else {
+        alert(data.error || 'Không thể tạo liên kết thanh toán PayOS. Vui lòng thử lại!');
+        setPayingOrderId(null);
+      }
+    } catch {
+      alert('Lỗi kết nối khi tạo liên kết thanh toán');
+      setPayingOrderId(null);
+    }
+  };
+
   return (
     <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
       {statusMsg === 'success' && (
         <div className="mb-8 p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center gap-4 shadow-xl">
           <CheckCircle className="w-8 h-8 shrink-0" />
           <div>
-            <h3 className="font-bold text-lg text-white">Cảm ơn bạn đã đặt hàng! 🎉</h3>
+            <h3 className="font-bold text-lg text-white">Cảm ơn bạn đã thanh toán / đặt hàng! 🎉</h3>
             <p className="text-sm text-emerald-300/90">
-              Đơn hàng của bạn đã được khởi tạo thành công và đang chuyển sang bộ phận đóng gói giao hàng.
+              Đơn hàng của bạn đã được khởi tạo/thanh toán thành công và đang chuyển sang bộ phận đóng gói giao hàng.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {statusMsg === 'cancelled' && (
+        <div className="mb-8 p-6 rounded-3xl bg-amber-500/10 border border-amber-500/30 text-amber-300 flex items-start gap-4 shadow-xl">
+          <AlertCircle className="w-8 h-8 shrink-0 text-amber-400 mt-0.5" />
+          <div>
+            <h3 className="font-bold text-lg text-white">Bạn đã hủy hoặc chưa hoàn tất thanh toán qua PayOS</h3>
+            <p className="text-sm text-neutral-300 mt-1 leading-relaxed">
+              Đơn hàng {cancelledOrderId ? `#${cancelledOrderId.slice(-6).toUpperCase()}` : ''} của bạn vẫn được lưu giữ an toàn. Bạn có thể nhấn nút <strong className="text-amber-400">&quot;Thanh Toán Lại PayOS (VietQR)&quot;</strong> bên dưới đơn hàng bất kỳ lúc nào để tiếp tục thanh toán!
             </p>
           </div>
         </div>
@@ -201,6 +236,24 @@ function OrdersContent() {
                     </span>
                   </div>
                 </div>
+
+                {/* PayOS Retry Payment Action */}
+                {order.payment_method === 'PayOS' && !isPaid && status !== 'Cancelled' && (
+                  <div className="pt-3 border-t border-neutral-800/80 flex items-center justify-between flex-wrap gap-3 bg-amber-500/5 p-3.5 rounded-2xl border border-amber-500/20">
+                    <span className="text-xs text-amber-300 font-medium flex items-center gap-1.5">
+                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                      Đơn hàng này chưa hoàn tất thanh toán qua PayOS.
+                    </span>
+                    <button
+                      onClick={() => handleRePayPayOS(ordId, totalPrice)}
+                      disabled={payingOrderId === ordId}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-black text-xs shadow-md transition-all flex items-center gap-2"
+                    >
+                      <CreditCard className="w-4 h-4" />
+                      {payingOrderId === ordId ? 'Đang Khởi Tạo PayOS...' : 'Thanh Toán Lại PayOS (VietQR)'}
+                    </button>
+                  </div>
+                )}
 
               </div>
             );
