@@ -7,7 +7,8 @@ export default function ContactWidget() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2.5">
+    <div className="fixed bottom-20 right-5 z-50 flex flex-col items-end gap-2.5">
+
       {/* Expanded Quick Contact Buttons */}
       {isOpen && (
         <div className="flex flex-col gap-2.5 mb-1 animate-in fade-in slide-in-from-bottom-3 duration-200">
@@ -51,11 +52,12 @@ export default function ContactWidget() {
       {/* Small Compact Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2.5 rounded-full bg-gradient-to-r from-amber-500 to-indigo-600 text-white shadow-xl hover:scale-110 transition-all border border-white/20 flex items-center justify-center"
-        title="Tư vấn Kính Mắt 24/7"
+        className="p-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-2xl hover:scale-110 transition-all border border-white/20 flex items-center justify-center group"
+        title="Liên hệ Hotline & Chat Zalo"
       >
-        {isOpen ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
+        {isOpen ? <X className="w-5 h-5" /> : <Phone className="w-5 h-5 animate-pulse" />}
       </button>
+
     </div>
   );
 }
