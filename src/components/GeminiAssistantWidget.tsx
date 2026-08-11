@@ -29,19 +29,28 @@ const QUICK_SUGGESTIONS = [
 ];
 
 export default function GeminiAssistantWidget() {
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 'welcome-1',
-      role: 'model',
-      content:
-        'Dạ em chào anh/chị! 👓 Em là **Chuyên gia AI Tư vấn Kính Mắt của GlassVault**. Em có thể tư vấn chọn gọng kính theo khuôn mặt, gợi ý kính râm, tròng kính chống ánh sáng xanh & tra cứu sản phẩm trực tiếp từ kho hàng GlassVault.\n\nAnh/chị đang cần chọn mẫu kính nào ạ?',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    setMessages([
+      {
+        id: 'welcome-1',
+        role: 'model',
+        content:
+          'Dạ em chào anh/chị! 👓 Em là **Chuyên gia AI Tư vấn Kính Mắt của GlassVault**. Em có thể tư vấn chọn gọng kính theo khuôn mặt, gợi ý kính râm, tròng kính chống ánh sáng xanh & tra cứu sản phẩm trực tiếp từ kho hàng GlassVault.\n\nAnh/chị đang cần chọn mẫu kính nào ạ?',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ]);
+  }, []);
+
+  if (!mounted) return null;
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -83,9 +83,9 @@ ${ragData.contextText}
       },
     };
 
-    // Gọi Gemini API (thử gemini-2.5-flash trước, nếu fallback sang gemini-1.5-flash)
+    // Gọi Gemini API (Sử dụng gemini-3.6-flash / gemini-flash-latest)
     let response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -94,9 +94,9 @@ ${ragData.contextText}
     );
 
     if (!response.ok) {
-      // Fallback endpoint
+      // Fallback endpoint sang gemini-flash-latest
       response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -104,6 +104,7 @@ ${ragData.contextText}
         }
       );
     }
+
 
     if (!response.ok) {
       const errText = await response.text();
