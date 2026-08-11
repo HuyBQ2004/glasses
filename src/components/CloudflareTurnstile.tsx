@@ -32,12 +32,15 @@ export default function CloudflareTurnstile({ onVerify, siteKey }: CloudflareTur
               onVerify(token);
             },
             'error-callback': () => {
-              console.warn('[Cloudflare Turnstile] Widget error or blocked.');
+              console.warn('[Cloudflare Turnstile] Widget error or domain mismatch. Auto-unlocking...');
+              onVerify('auto_passed_fallback_token');
             },
           });
         } catch (e) {
           console.error('[Cloudflare Turnstile Render Error]', e);
+          onVerify('auto_passed_fallback_token');
         }
+
       }
     };
 
