@@ -49,9 +49,6 @@ export default function GeminiAssistantWidget() {
     ]);
   }, []);
 
-  if (!mounted) return null;
-
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -61,6 +58,9 @@ export default function GeminiAssistantWidget() {
       scrollToBottom();
     }
   }, [messages, isOpen]);
+
+  if (!mounted) return null;
+
 
   const handleSend = async (textToSend?: string) => {
     const query = (textToSend || inputMessage).trim();

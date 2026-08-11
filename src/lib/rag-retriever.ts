@@ -82,7 +82,8 @@ export async function retrieveEyewearContext(userQuery: string): Promise<RAGResu
 
   // B. Parse mức giá từ query (VD: "dưới 1 triệu", "dưới 500k", "từ 1tr đến 2tr")
   let maxPrice: number | null = null;
-  let minPrice: number | null = null;
+  const minPrice: number | null = null;
+
 
   if (queryLower.includes('dưới 500k') || queryLower.includes('duoi 500k') || queryLower.includes('< 500k')) {
     maxPrice = 500000;

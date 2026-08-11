@@ -62,13 +62,6 @@ function CheckoutContent() {
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product_id?.price || 0) * item.amount, 0);
 
-  // Auto apply voucher if passed via query or select
-  useEffect(() => {
-    if (voucherCode && subtotal > 0) {
-      handleApplyVoucher(voucherCode);
-    }
-  }, [voucherCode, subtotal]);
-
   const handleApplyVoucher = async (codeToApply?: string) => {
     const code = (codeToApply || voucherCode).trim().toUpperCase();
     setVoucherError('');
@@ -103,6 +96,14 @@ function CheckoutContent() {
       setAppliedVoucher(null);
     }
   };
+
+  // Auto apply voucher if passed via query or select
+  useEffect(() => {
+    if (voucherCode && subtotal > 0) {
+      handleApplyVoucher(voucherCode);
+    }
+  }, [voucherCode, subtotal]);
+
 
   const handleRemoveVoucher = () => {
     setVoucherCode('');
