@@ -42,7 +42,15 @@ ${ragData.contextText}
 `;
 
     // 3. Format tin nhắn cho Gemini API (Gemini v1beta generateContent)
-    const contents: any[] = [];
+    interface GeminiContentPart {
+      text: string;
+    }
+    interface GeminiContentItem {
+      role: 'user' | 'model';
+      parts: GeminiContentPart[];
+    }
+
+    const contents: GeminiContentItem[] = [];
 
     // Thêm lịch sử hội thoại nếu có (tối đa 6 tin nhắn gần nhất để giữ context)
     if (Array.isArray(history) && history.length > 0) {
@@ -121,11 +129,13 @@ ${ragData.contextText}
       products: ragData.matchedProducts.slice(0, 4), // Trả về tối đa 4 sản phẩm gợi ý hiển thị card
       knowledgeTopics: ragData.knowledgeTopics,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Lỗi hệ thống khi kết nối AI';
     console.error('API /api/ai/chat Exception:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Lỗi hệ thống khi kết nối AI' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
 }
+
